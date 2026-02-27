@@ -16,12 +16,12 @@ export default function NameGradient({
   useEffect(() => {
     const interval = setInterval(() => {
       setIsBlueTheme((prev) => !prev);
-    }, 10000);
+    }, 12000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const textClass = "block whitespace-normal lg:whitespace-nowrap";
+  const textClass = " whitespace-normal lg:whitespace-nowrap";
 
   return (
     <span className={`relative block ${className}`.trim()}>
@@ -45,3 +45,4 @@ export default function NameGradient({
     </span>
   );
 }
+
