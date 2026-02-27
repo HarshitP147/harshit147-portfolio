@@ -1,0 +1,92 @@
+# AGENTS.md
+
+## Project Overview
+- Project: `harshit-portfolio`
+- Framework: Next.js 16 (App Router) with React 19 and TypeScript.
+- Styling: Tailwind CSS v4 + ShadCN/UI customized properties in `src/app/globals.css`.
+- UI primitives: Base UI wrappers in `src/components/ui/*`.
+- 3D: Three.js via React Three Fiber (`@react-three/fiber`) and Drei (`@react-three/drei`).
+- Analytics: Vercel Analytics + Speed Insights are mounted in the root layout.
+
+## Runtime and Tooling
+- Package manager: `npm`.
+- Dev server: `npm run dev`.
+- Build: `npm run build`.
+- Production run: `npm run start`.
+- Lint: `npm run lint`.
+
+## Repository Structure
+- `src/app/layout.tsx`: Global font setup (`Outfit`, `Geist`, `Geist Mono`) and Vercel telemetry components.
+- `src/app/page.tsx`: Homepage composition (`NameGradient`, `ModelCanvas`, `TechMarquee`).
+- `src/app/globals.css`: Theme tokens, animations, marquee styles, and global Tailwind layers.
+- `src/components/ModelCanvas.tsx`: 3D scene setup, GLB loading, lighting, floor, shadows, controls, intro spin behavior.
+- `src/components/NameGradient.tsx`: Alternating gradient hero name text animation.
+- `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
+- `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
+- `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
+- `public/scene.glb`: Main 3D model asset loaded by the homepage scene.
+- `public/*.svg`: Logo/icon assets used by marquee and UI.
+
+## Aliases and Imports
+- TS path alias is configured as `@/* -> ./src/*` in `tsconfig.json`.
+- Preferred imports in project code:
+- `@/components/...`
+- `@/components/ui/...`
+- `@/lib/utils`
+
+## Homepage Behavior
+- Primary route is a split hero layout with text content and a square 3D canvas.
+- `NameGradient` toggles between blue and red gradient themes every 12 seconds.
+- `TechMarquee` renders two opposing-direction marquee rows and pauses animation on hover/focus.
+
+## 3D Scene Notes (`src/components/ModelCanvas.tsx`)
+- GLB source path is hardcoded to `/scene.glb`.
+- Meshes in the loaded scene are traversed and set to cast/receive shadows.
+- The model starts with a fast rotation burst and eases to a slow display rotation.
+- Auto-rotation stops permanently once user interaction begins (`OrbitControls` `onStart`).
+- Floor plane is auto-positioned from model bounding box min Y and receives shadows.
+- `OrbitControls` constraints:
+- Pan disabled.
+- Max polar angle below floor view (`Math.PI / 2 - 0.05`).
+- Zoom clamped with `minDistance` and `maxDistance`.
+
+## Styling and Theme System
+- Theme tokens are CSS variables (`--background`, `--foreground`, etc.) in `globals.css`.
+- Tailwind theme is wired through `@theme inline` for utility token usage.
+- Dark values are defined both in `.dark` and `prefers-color-scheme: dark` blocks.
+- Custom animation and visual classes include:
+- `.gradient-layer`, `.gradient-blue`, `.gradient-red`
+- `.marquee`, `.marquee-track`, `.marquee-right`
+- Keyframes for marquee, blink, spin, and pulse.
+
+## UI Component Conventions
+- UI primitives are authored as composable wrappers around `@base-ui/react`.
+- `data-slot` attributes are used consistently for styling and composition hooks.
+- Class composition uses `cn()` and `class-variance-authority` variants.
+- Most interactive primitives are client components (`"use client"`).
+
+## Editing Guidelines for Agents
+- Preserve App Router structure and keep route-level files in `src/app`.
+- Use existing design tokens from `globals.css` before introducing new colors.
+- Prefer extending `src/components/ui/*` patterns rather than creating one-off form controls.
+- Keep `ModelCanvas` interactions constrained for UX consistency.
+- Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
+- Keep imports alias-first (`@/...`) instead of long relative paths.
+- Maintain TypeScript strict compatibility.
+
+## Common Tasks
+- Replace 3D model:
+- Overwrite `public/scene.glb` or update the path in `ModelCanvas.tsx`.
+- Add a new marquee icon:
+- Add asset in `public/`.
+- Add metadata entry to `icons` array in `src/components/TechMarquee.tsx`.
+- Tune scene lighting/shadows:
+- Update light/floor/contact shadow settings in `src/components/ModelCanvas.tsx`.
+
+## Validation Checklist
+- Run `npm run lint` after significant UI or TS changes.
+- For 3D changes, verify:
+- Model loads without runtime errors.
+- Controls cannot orbit below floor.
+- Shadows remain visible and performant.
+- For style changes, verify both desktop and mobile layout behavior.

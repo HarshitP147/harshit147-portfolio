@@ -10,29 +10,35 @@ type TechItem = {
 };
 
 const icons: TechItem[] = [
-  { label: "GitHub", slug: "github", accent: "rgba(147, 147, 147, 0.6)", src: "/Github--Streamline-Unicons.svg", invert: true },
-  { label: "Matplotlib", slug: "matplotlib", accent: "rgba(29, 169, 224, 0.6)", src: "/Matplotlib_icon.svg" },
-  { label: "PyTorch", slug: "pytorch", accent: "rgba(238, 76, 44, 0.6)", src: "/PyTorch_logo_icon.svg" },
+  { label: "HTML", slug: "html", accent: "rgba(227, 79, 38, 0.7)", src: "/html-1.svg" },
+  { label: "CSS", slug: "css", accent: "rgba(21, 114, 182, 0.7)", src: "/icons8-css-logo.svg" },
+  { label: "JavaScript", slug: "javascript", accent: "rgba(247, 223, 30, 0.7)", src: "/javascript-logo-svgrepo-com.svg" },
+  { label: "TypeScript", slug: "typescript", accent: "rgba(49, 120, 198, 0.7)", src: "/ts-logo-128.svg" },
   { label: "React", slug: "react", accent: "rgba(97, 218, 251, 0.7)", src: "/React--Streamline-Svg-Logos.svg" },
-  { label: "TensorFlow", slug: "tensorflow", accent: "rgba(255, 107, 0, 0.6)", src: "/Tensorflow_logo.svg" },
-  { label: "Xcode", slug: "xcode", accent: "rgba(33, 150, 243, 0.6)", src: "/Xcode.svg" },
+  { label: "Next.js", slug: "next", accent: "rgba(255, 255, 255, 0.6)", src: "/nextjs-icon-svgrepo-com.svg", invert: true },
+  { label: "Tailwind CSS", slug: "tailwind", accent: "rgba(56, 189, 248, 0.7)", src: "/Tailwind%20CSS.svg" },
+  { label: "Express", slug: "express", accent: "rgba(156, 163, 175, 0.55)", src: "/expressjs-icon.svg", invert: true },
+  { label: "Docker", slug: "docker", accent: "rgba(14, 118, 168, 0.6)", src: "/docker-mark-blue.svg" },
+  { label: "OpenGL", slug: "opengl", accent: "rgba(85, 134, 164, 0.65)", src: "/opengl-svgrepo-com.svg" },
   { label: "C", slug: "c", accent: "rgba(0, 116, 197, 0.6)", src: "/c-1.svg" },
   { label: "C++", slug: "cpp", accent: "rgba(0, 122, 204, 0.65)", src: "/cpp.svg" },
-  { label: "Docker", slug: "docker", accent: "rgba(14, 118, 168, 0.6)", src: "/docker-mark-blue.svg" },
-  { label: "Express", slug: "express", accent: "rgba(156, 163, 175, 0.55)", src: "/expressjs-icon.svg", invert: true },
+  { label: "Python", slug: "python", accent: "rgba(52, 102, 163, 0.6)", src: "/python-logo.svg" },
+  { label: "NumPy", slug: "numpy", accent: "rgba(77, 121, 167, 0.6)", src: "/numpy-svgrepo-com.svg" },
+  { label: "Matplotlib", slug: "matplotlib", accent: "rgba(29, 169, 224, 0.6)", src: "/Matplotlib_icon.svg" },
+  { label: "PyTorch", slug: "pytorch", accent: "rgba(238, 76, 44, 0.6)", src: "/PyTorch_logo_icon.svg" },
+  { label: "TensorFlow", slug: "tensorflow", accent: "rgba(255, 107, 0, 0.6)", src: "/Tensorflow_logo.svg" },
+  { label: "Flask", slug: "flask", accent: "rgba(156, 163, 175, 0.55)", src: "/palletsprojects_flask-icon~v2.svg", invert: true },
   { label: "MongoDB", slug: "mongodb", accent: "rgba(67, 153, 52, 0.6)", src: "/mongodb-icon.svg" },
   { label: "MySQL", slug: "mysql", accent: "rgba(0, 97, 136, 0.6)", src: "/mysql-icon.svg" },
-  { label: "Next.js", slug: "next", accent: "rgba(255, 255, 255, 0.6)", src: "/nextjs-icon-svgrepo-com.svg", invert: true },
-  { label: "NumPy", slug: "numpy", accent: "rgba(77, 121, 167, 0.6)", src: "/numpy-svgrepo-com.svg" },
-  { label: "Flask", slug: "flask", accent: "rgba(156, 163, 175, 0.55)", src: "/palletsprojects_flask-icon~v2.svg", invert: true },
   { label: "PostgreSQL", slug: "postgresql", accent: "rgba(51, 103, 145, 0.6)", src: "/postgresql-icon.svg" },
-  { label: "Python", slug: "python", accent: "rgba(52, 102, 163, 0.6)", src: "/python-logo.svg" },
   { label: "Supabase", slug: "supabase", accent: "rgba(62, 207, 142, 0.6)", src: "/supabase-logo-icon.svg" },
-  { label: "Swift", slug: "swift", accent: "rgba(240, 80, 56, 0.6)", src: "/swift-svgrepo-com.svg" },
-  { label: "TypeScript", slug: "typescript", accent: "rgba(49, 120, 198, 0.7)", src: "/ts-logo-128.svg" },
-  { label: "Vercel", slug: "vercel", accent: "rgba(255, 255, 255, 0.6)", src: "/vercel-icon-svgrepo-com.svg", invert: true },
-  { label: "JavaScript", slug: "javascript", accent: "rgba(247, 223, 30, 0.7)", src: "/javascript-logo-svgrepo-com.svg" },
   { label: "Neovim", slug: "neovim", accent: "rgba(87, 173, 90, 0.6)", src: "/neovimio-icon.svg" },
+  { label: "GitHub", slug: "github", accent: "rgba(147, 147, 147, 0.6)", src: "/Github--Streamline-Unicons.svg", invert: true },
+  { label: "Vercel", slug: "vercel", accent: "rgba(255, 255, 255, 0.6)", src: "/vercel-icon-svgrepo-com.svg", invert: true },
+  { label: "Ollama", slug: "ollama", accent: "rgba(255, 255, 255, 0.6)", src: "/ollama.svg", invert: true },
+  { label: "LM Studio", slug: "lmstudio", accent: "rgba(255, 255, 255, 0.6)", src: "/lmstudio.svg", invert: true },
+  { label: "Xcode", slug: "xcode", accent: "rgba(33, 150, 243, 0.6)", src: "/Xcode.svg" },
+  { label: "Swift", slug: "swift", accent: "rgba(240, 80, 56, 0.6)", src: "/swift-svgrepo-com.svg" },
 ];
 
 const midpoint = Math.ceil(icons.length / 2);
@@ -52,6 +58,8 @@ function MarqueeItem({ item }: { item: TechItem }) {
       style={{ "--icon-accent": item.accent } as CSSProperties}
       role="img"
       aria-label={item.label}
+      data-label={item.label}
+      title={item.label}
       tabIndex={0}
     >
       <img
