@@ -1,6 +1,8 @@
 import NameGradient from "@/components/NameGradient";
 import ModelCanvas from "@/components/ModelCanvas";
 import TechMarquee from "@/components/TechMarquee";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
   return (
@@ -22,6 +24,13 @@ export default function Home() {
         </div>
       </main>
       <TechMarquee />
+      <div className="mx-auto w-full max-w-5xl px-6 pb-12">
+        <Separator className="mt-8 bg-border/70" />
+        <div className="mt-6 flex w-full items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">Made by Harshit</p>
+          <ThemeToggle />
+        </div>
+      </div>
     </div>
   );
 }

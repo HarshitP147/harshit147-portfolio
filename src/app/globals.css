@@ -118,7 +118,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0a0a0a;
     --foreground: #fafafa;
     --card: #0a0a0a;
@@ -159,6 +159,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 500ms ease, color 500ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root,
+  body,
+  .icon-card,
+  .icon-card img {
+    transition: background-color 500ms ease, color 500ms ease, filter 500ms ease;
   }
 }
 
@@ -306,7 +316,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root .auto-invert {
+  :root:not(.light) .auto-invert {
     filter: invert(1);
   }
 }
@@ -317,8 +327,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .icon-card:hover,
-  .icon-card:focus-visible {
+  :root:not(.light) .icon-card:hover,
+  :root:not(.light) .icon-card:focus-visible {
     filter: drop-shadow(0 0 16px var(--icon-accent, rgba(20, 212, 142, 0.5)));
   }
 }
