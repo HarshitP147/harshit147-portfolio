@@ -5,17 +5,20 @@ import { useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
 
 import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
+import type {
+  UserPostsQuery,
+  UserPostsQueryVariables,
+} from "@/lib/graphql/generated";
 
 type BlogPostsApolloLoggerProps = {
-  publicationHost: string;
+  username: string;
 };
 
 const PUBLICATION_POSTS_QUERY = gql`
-  query PublicationPosts($host: String!, $first: Int!) {
-    publication(host: $host) {
+  query UserPosts($username: String!, $page: Int!, $pageSize: Int!) {
+    user(username: $username) {
       id
-      title
-      posts(first: $first) {
+      posts(page: $page, pageSize: $pageSize) {
         edges {
           node {
             id
@@ -30,20 +33,26 @@ const PUBLICATION_POSTS_QUERY = gql`
             }
           }
         }
+        pageInfo {
+          hasNextPage
+        }
       }
     }
   }
 `;
 
-export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApolloLoggerProps) {
-  const { data, error, refetch } = useQuery(PUBLICATION_POSTS_QUERY, {
-    variables: { host: publicationHost, first: 50 },
+export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLoggerProps) {
+  const { data, error, refetch } = useQuery<
+    UserPostsQuery,
+    UserPostsQueryVariables
+  >(PUBLICATION_POSTS_QUERY, {
+    variables: { username, page: 1, pageSize: 50 },
     fetchPolicy: "cache-only",
   });
   const [isFetching, setIsFetching] = useState(false);
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
-  const cachedPosts = data?.publication?.posts?.edges ?? [];
+  const cachedPosts = data?.user?.posts?.edges ?? [];
   const hasCachedPosts = cachedPosts.length > 0;
 
   useEffect(() => {
@@ -58,10 +67,10 @@ export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApol
     setHasAttemptedFetch(true);
     setIsFetching(true);
 
-    refetch({ host: publicationHost, first: 50 })
+    refetch({ username, page: 1, pageSize: 50 })
       .catch(() => undefined)
       .finally(() => setIsFetching(false));
-  }, [error, hasAttemptedFetch, hasCachedPosts, publicationHost, refetch]);
+  }, [error, hasAttemptedFetch, hasCachedPosts, username, refetch]);
 
   if (isFetching && !hasCachedPosts) {
     return (
@@ -79,30 +88,8 @@ export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApol
 
   const posts =
     cachedPosts
-      ?.map(
-        (edge: {
-          node?: {
-            id: string;
-            title: string;
-            brief?: string | null;
-            slug?: string | null;
-            publishedAt?: string | null;
-            readTimeInMinutes?: number | null;
-            coverImage?: { url?: string | null } | null;
-          } | null;
-        }) => edge?.node,
-      )
-      .filter(
-        (node: { id?: string; slug?: string | null } | null | undefined): node is {
-          id: string;
-          title: string;
-          brief?: string | null;
-          slug: string;
-          publishedAt?: string | null;
-          readTimeInMinutes?: number | null;
-          coverImage?: { url?: string | null } | null;
-        } => Boolean(node?.id && node?.slug),
-      ) ?? [];
+      ?.map((edge) => edge.node)
+      .filter((node) => Boolean(node?.id && node?.slug)) ?? [];
 
   if (posts.length === 0) {
     return <p className="text-sm text-muted-foreground">No posts found yet.</p>;

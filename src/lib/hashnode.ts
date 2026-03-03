@@ -3,12 +3,15 @@ type HashnodePost = {
   title: string;
   brief: string;
   url: string;
+  slug: string;
+  publishedAt: string;
+  readTimeInMinutes: number;
 };
 
-type HashnodePublicationResponse = {
+type HashnodeUserResponse = {
   data?: {
-    publication?: {
-      title?: string;
+    user?: {
+      name?: string;
       posts?: {
         edges?: Array<{
           node?: HashnodePost;
@@ -20,29 +23,32 @@ type HashnodePublicationResponse = {
 };
 
 const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT ?? "https://gql.hashnode.com";
-const HASHNODE_PUBLICATION_HOST = process.env.HASHNODE_PUBLICATION_HOST;
+const HASHNODE_USERNAME = process.env.HASHNODE_USERNAME;
 
 export type HashnodePostSummary = HashnodePost;
 
 export async function fetchHashnodePosts(first = 50): Promise<{
-  publicationTitle: string | null;
+  authorName: string | null;
   posts: HashnodePostSummary[];
 }> {
-  if (!HASHNODE_PUBLICATION_HOST) {
-    return { publicationTitle: null, posts: [] };
+  if (!HASHNODE_USERNAME) {
+    return { authorName: null, posts: [] };
   }
 
   const query = `
-    query PublicationPosts($host: String!, $first: Int!) {
-      publication(host: $host) {
-        title
-        posts(first: $first) {
+    query UserPosts($username: String!, $page: Int!, $pageSize: Int!) {
+      user(username: $username) {
+        name
+        posts(page: $page, pageSize: $pageSize) {
           edges {
             node {
               id
               title
               brief
               url
+              slug
+              publishedAt
+              readTimeInMinutes
             }
           }
         }
@@ -57,7 +63,7 @@ export async function fetchHashnodePosts(first = 50): Promise<{
     },
     body: JSON.stringify({
       query,
-      variables: { host: HASHNODE_PUBLICATION_HOST, first },
+      variables: { username: HASHNODE_USERNAME, page: 1, pageSize: first },
     }),
     next: { revalidate: 600 },
   });
@@ -66,17 +72,17 @@ export async function fetchHashnodePosts(first = 50): Promise<{
     throw new Error(`Hashnode API error: ${response.status}`);
   }
 
-  const payload = (await response.json()) as HashnodePublicationResponse;
+  const payload = (await response.json()) as HashnodeUserResponse;
 
   if (payload.errors?.length) {
     throw new Error(payload.errors.map((error) => error.message).join(", "));
   }
 
-  const publicationTitle = payload.data?.publication?.title ?? null;
+  const authorName = payload.data?.user?.name ?? null;
   const posts =
-    payload.data?.publication?.posts?.edges
+    payload.data?.user?.posts?.edges
       ?.map((edge) => edge.node)
       .filter((node): node is HashnodePost => Boolean(node)) ?? [];
 
-  return { publicationTitle, posts };
+  return { authorName, posts };
 }

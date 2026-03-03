@@ -1,20 +1,24 @@
 "use client";
 
 import { gql } from "@apollo/client";
-import { motion } from "framer-motion";
 import { useQuery } from "@apollo/client/react";
+import { motion } from "framer-motion";
 
 import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
+import type {
+  UserLatestPostsQuery,
+  UserLatestPostsQueryVariables,
+} from "@/lib/graphql/generated";
 
 type HomeLatestBlogsProps = {
-  publicationHost: string;
+  username: string;
 };
 
 const LATEST_POSTS_QUERY = gql`
-  query LatestPosts($host: String!, $first: Int!) {
-    publication(host: $host) {
+  query UserLatestPosts($username: String!, $page: Int!, $pageSize: Int!) {
+    user(username: $username) {
       id
-      posts(first: $first) {
+      posts(page: $page, pageSize: $pageSize) {
         edges {
           node {
             id
@@ -36,9 +40,12 @@ const LATEST_POSTS_QUERY = gql`
   }
 `;
 
-export default function HomeLatestBlogs({ publicationHost }: HomeLatestBlogsProps) {
-  const { data, loading, error } = useQuery(LATEST_POSTS_QUERY, {
-    variables: { host: publicationHost, first: 3 },
+export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
+  const { data, loading, error } = useQuery<
+    UserLatestPostsQuery,
+    UserLatestPostsQueryVariables
+  >(LATEST_POSTS_QUERY, {
+    variables: { username, page: 1, pageSize: 3 },
     fetchPolicy: "cache-first",
     nextFetchPolicy: "cache-first",
   });
@@ -63,37 +70,15 @@ export default function HomeLatestBlogs({ publicationHost }: HomeLatestBlogsProp
   }
 
   const posts =
-    data?.publication?.posts?.edges
-      ?.map(
-        (edge: {
-          node?: {
-            id: string;
-            title: string;
-            brief?: string | null;
-            slug?: string | null;
-            publishedAt?: string | null;
-            readTimeInMinutes?: number | null;
-            coverImage?: { url?: string | null } | null;
-          } | null;
-        }) => edge?.node,
-      )
-      .filter(
-        (node: { id?: string; slug?: string | null } | null | undefined): node is {
-          id: string;
-          title: string;
-          brief?: string | null;
-          slug: string;
-          publishedAt?: string | null;
-          readTimeInMinutes?: number | null;
-          coverImage?: { url?: string | null } | null;
-        } => Boolean(node?.id && node?.slug),
-      ) ?? [];
+    data?.user?.posts?.edges
+      ?.map((edge) => edge.node)
+      .filter((node) => Boolean(node?.id && node?.slug)) ?? [];
 
   if (posts.length === 0) {
     return <p className="text-sm text-muted-foreground">No posts yet.</p>;
   }
 
-  const hasMore = Boolean(data?.publication?.posts?.pageInfo?.hasNextPage);
+  const hasMore = Boolean(data?.user?.posts?.pageInfo?.hasNextPage);
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,7 +96,13 @@ export default function HomeLatestBlogs({ publicationHost }: HomeLatestBlogsProp
           </motion.a>
         ) : null}
       </div>
-      <div className="grid gap-6 md:grid-cols-3">
+      <div
+        className={
+          posts.length < 3
+            ? "flex flex-wrap justify-center gap-6"
+            : "grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+        }
+      >
         {posts.map((post) => (
           <BlogPostCard
             key={post.id}
@@ -122,6 +113,7 @@ export default function HomeLatestBlogs({ publicationHost }: HomeLatestBlogsProp
             publishedAt={post.publishedAt ?? null}
             readTimeInMinutes={post.readTimeInMinutes ?? null}
             size="compact"
+            className={posts.length < 3 ? "w-full max-w-[360px]" : undefined}
           />
         ))}
       </div>

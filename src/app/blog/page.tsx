@@ -3,17 +3,17 @@ import BackToHomeLink from "@/components/BackToHomeLink";
 import BlogPostsApolloLogger from "@/components/BlogPostsApolloLogger";
 
 export default async function BlogPage() {
-  const publicationHost =
-    process.env.HASHNODE_PUBLICATION_HOST ??
-    process.env.NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST ??
+  const username =
+    process.env.HASHNODE_USERNAME ??
+    process.env.NEXT_PUBLIC_HASHNODE_USERNAME ??
     null;
 
-  if (!publicationHost) {
+  if (!username) {
     return (
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 pb-16 pt-20 text-foreground">
         <h1 className="text-3xl font-semibold">Blog</h1>
         <p className="text-sm text-muted-foreground">
-          Set `HASHNODE_PUBLICATION_HOST` in your environment to render posts.
+          Set `HASHNODE_USERNAME` in your environment to render posts.
         </p>
       </section>
     );
@@ -33,7 +33,7 @@ export default async function BlogPage() {
           Notes, experiments, and build logs from Hashnode.
         </p>
       </header>
-      <BlogPostsApolloLogger publicationHost={publicationHost} />
+      <BlogPostsApolloLogger username={username} />
       <div className="flex items-center gap-4 pt-6 text-muted-foreground">
         <span className="h-px flex-1 bg-border/70" />
         <span className="text-xs uppercase tracking-[0.25em]">

@@ -14,6 +14,7 @@
 - Build: `npm run build`.
 - Production run: `npm run start`.
 - Lint: `npm run lint`.
+- GraphQL Codegen: `npm run codegen` (config in `codegen.ts`, output `src/lib/graphql/generated.ts`).
 
 ## Repository Structure
 - `src/app/layout.tsx`: Global font setup (`Outfit`, `Geist`, `Geist Mono`) and Vercel telemetry components.
@@ -25,6 +26,7 @@
 - `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
 - `src/components/BlogPostCard.tsx`: Shared blog card + skeleton for home and blog index.
 - `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode content.html + metadata).
+- `src/lib/graphql/generated.ts`: GraphQL Codegen output (types + typed documents).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
 - `public/scene.glb`: Main 3D model asset loaded by the homepage scene.
@@ -98,8 +100,9 @@
 - Hashnode `posts(first: ...)` has a max of 50; requests above 50 return `BAD_USER_INPUT`.
 - Blog queries should include `publication { id }` and `post { id }` for cache normalization.
 - Blog list cards and detail view use `slug`, `publishedAt`, and `readTimeInMinutes`.
+- GraphQL operations are defined in TSX files via `gql` and Codegen extracts types from them.
 - Env vars:
-- `HASHNODE_PUBLICATION_HOST` (server) and `NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST` (client) must be set.
+- `HASHNODE_USERNAME` (server) and `NEXT_PUBLIC_HASHNODE_USERNAME` (client) must be set.
 - Apollo cache is persisted to `localStorage` under `apollo-cache-v1` for local-first behavior.
 - The cache persist link uses an `Observable` wrapper; do not call `.map()` on `forward(...)`.
 - Theme toggle must initialize from stored preference to avoid theme flipping on navigation.

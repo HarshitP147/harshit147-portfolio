@@ -35,13 +35,11 @@ export default function Home() {
       </main>
       <TechMarquee />
       <section className="mx-auto w-full max-w-5xl px-6 pb-10 text-foreground">
-        {process.env.NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST ? (
-          <HomeLatestBlogs
-            publicationHost={process.env.NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST}
-          />
+        {process.env.NEXT_PUBLIC_HASHNODE_USERNAME ? (
+          <HomeLatestBlogs username={process.env.NEXT_PUBLIC_HASHNODE_USERNAME} />
         ) : (
           <p className="text-sm text-muted-foreground">
-            Set `NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST` to load posts.
+            Set `NEXT_PUBLIC_HASHNODE_USERNAME` to load posts.
           </p>
         )}
       </section>

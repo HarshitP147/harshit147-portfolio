@@ -1,27 +1,35 @@
 "use client";
 
-import Link from "next/link";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
+import type {
+  UserPostBySlugQuery,
+  UserPostBySlugQueryVariables,
+} from "@/lib/graphql/generated";
 const POST_QUERY = gql`
-  query PublicationPost($host: String!, $slug: String!) {
-    publication(host: $host) {
+  query UserPostBySlug($username: String!, $page: Int!, $pageSize: Int!) {
+    user(username: $username) {
       id
-      post(slug: $slug) {
-        id
-        title
-        brief
-        slug
-        url
-        publishedAt
-        readTimeInMinutes
-        coverImage {
-          url
-        }
-        content {
-          html
+      posts(page: $page, pageSize: $pageSize) {
+        edges {
+          node {
+            id
+            title
+            brief
+            slug
+            url
+            publishedAt
+            readTimeInMinutes
+            coverImage {
+              url
+            }
+            content {
+              html
+            }
+          }
         }
       }
     }
@@ -35,16 +43,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 type BlogPostDetailApolloLoggerProps = {
-  publicationHost: string;
+  username: string;
   slug: string;
 };
 
 export default function BlogPostDetailApolloLogger({
-  publicationHost,
+  username,
   slug,
 }: BlogPostDetailApolloLoggerProps) {
-  const { data, loading, error } = useQuery(POST_QUERY, {
-    variables: { host: publicationHost, slug },
+  const { data, loading, error } = useQuery<
+    UserPostBySlugQuery,
+    UserPostBySlugQueryVariables
+  >(POST_QUERY, {
+    variables: { username, page: 1, pageSize: 50 },
     fetchPolicy: "cache-first",
     nextFetchPolicy: "cache-first",
   });
@@ -72,7 +83,9 @@ export default function BlogPostDetailApolloLogger({
     return <p className="text-sm text-muted-foreground">{error.message}</p>;
   }
 
-  const post = data?.publication?.post ?? null;
+  const post =
+    data?.user?.posts?.edges?.map((edge) => edge.node).find((node) => node?.slug === slug) ??
+    null;
 
   if (!post) {
     return (
