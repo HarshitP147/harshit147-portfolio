@@ -27,7 +27,7 @@ const HASHNODE_USERNAME = process.env.HASHNODE_USERNAME;
 
 export type HashnodePostSummary = HashnodePost;
 
-export async function fetchHashnodePosts(first = 50): Promise<{
+export async function fetchHashnodePosts(first = 20): Promise<{
   authorName: string | null;
   posts: HashnodePostSummary[];
 }> {

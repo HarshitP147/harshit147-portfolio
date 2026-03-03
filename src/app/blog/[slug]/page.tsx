@@ -22,7 +22,7 @@ export default function BlogPostPage({
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 pb-28 pt-20">
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 pb-28 pt-20 text-foreground">
       <BlogPostDetailApolloLogger
         username={username}
         slug={params.slug}

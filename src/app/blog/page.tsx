@@ -30,7 +30,7 @@ export default async function BlogPage() {
           <div />
         </div>
         <p className="text-center text-sm text-muted-foreground">
-          Notes, experiments, and build logs from Hashnode.
+          Notes, experiments, thoughts and opinions.
         </p>
       </header>
       <BlogPostsApolloLogger username={username} />

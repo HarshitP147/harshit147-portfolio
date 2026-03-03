@@ -46,7 +46,7 @@ export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLogge
     UserPostsQuery,
     UserPostsQueryVariables
   >(PUBLICATION_POSTS_QUERY, {
-    variables: { username, page: 1, pageSize: 50 },
+    variables: { username, page: 1, pageSize: 20 },
     fetchPolicy: "cache-only",
   });
   const [isFetching, setIsFetching] = useState(false);
@@ -67,7 +67,7 @@ export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLogge
     setHasAttemptedFetch(true);
     setIsFetching(true);
 
-    refetch({ username, page: 1, pageSize: 50 })
+    refetch({ username, page: 1, pageSize: 20 })
       .catch(() => undefined)
       .finally(() => setIsFetching(false));
   }, [error, hasAttemptedFetch, hasCachedPosts, username, refetch]);

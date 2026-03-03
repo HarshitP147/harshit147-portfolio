@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type {
   UserPostBySlugQuery,
@@ -51,11 +51,12 @@ export default function BlogPostDetailApolloLogger({
   username,
   slug,
 }: BlogPostDetailApolloLoggerProps) {
+  const router = useRouter();
   const { data, loading, error } = useQuery<
     UserPostBySlugQuery,
     UserPostBySlugQueryVariables
   >(POST_QUERY, {
-    variables: { username, page: 1, pageSize: 50 },
+    variables: { username, page: 1, pageSize: 20 },
     fetchPolicy: "cache-first",
     nextFetchPolicy: "cache-first",
   });
@@ -89,11 +90,18 @@ export default function BlogPostDetailApolloLogger({
 
   if (!post) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 text-muted-foreground">
-        <p className="text-sm">We couldn&apos;t find this post.</p>
-        <Link href="/blog" className="text-sm text-foreground hover:underline">
-          Back to Blog
-        </Link>
+      <div className="flex w-full flex-col items-start gap-6 text-muted-foreground">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm text-muted-foreground hover:underline self-start"
+          style={{ textUnderlineOffset: "4px" }}
+        >
+          Go back
+        </button>
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+          <p className="text-sm">We couldn&apos;t find this post.</p>
+        </div>
       </div>
     );
   }
@@ -103,63 +111,70 @@ export default function BlogPostDetailApolloLogger({
     : null;
 
   return (
-    <article className="mx-auto flex w-full max-w-3xl flex-col gap-10 text-foreground">
-      <header className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-          <Link href="/blog" className="font-medium text-foreground hover:underline">
-            Back to Blog
-          </Link>
-          {post.url ? (
-            <a
-              href={post.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
-            >
-              View on Hashnode
-              <ArrowUpRight className="size-3.5" />
-            </a>
-          ) : null}
-        </div>
-        <div className="space-y-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Blog Post
-          </p>
-          <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-            {post.title}
-          </h1>
-          {post.brief ? (
-            <p className="text-base text-muted-foreground md:text-lg">
-              {post.brief}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {formattedDate ? <span>{formattedDate}</span> : null}
-            {formattedDate && post.readTimeInMinutes ? (
-              <span aria-hidden="true">•</span>
-            ) : null}
-            {post.readTimeInMinutes ? (
-              <span>{post.readTimeInMinutes} min read</span>
-            ) : null}
-          </div>
-        </div>
-        {post.coverImage?.url ? (
-          <div className="overflow-hidden rounded-3xl border border-foreground/10 bg-foreground/5">
-            <img
-              src={post.coverImage.url}
-              alt={post.title}
-              className="h-full w-full object-cover"
-            />
-          </div>
+    <div className="flex w-full flex-col items-start gap-6 text-foreground">
+      <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm text-muted-foreground hover:underline self-start"
+          style={{ textUnderlineOffset: "4px" }}
+        >
+          Go back
+        </button>
+        {post.url ? (
+          <a
+            href={post.url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
+          >
+            View on Hashnode
+            <ArrowUpRight className="size-3.5" />
+          </a>
         ) : null}
-      </header>
-      <div className="prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4 prose-pre:bg-foreground/5">
-        {post.content?.html ? (
-          <div dangerouslySetInnerHTML={{ __html: post.content.html }} />
-        ) : (
-          <p className="text-sm text-muted-foreground">No content available.</p>
-        )}
       </div>
-    </article>
+      <article className="mx-auto flex w-full max-w-3xl flex-col gap-10">
+        <header className="space-y-6">
+          <div className="space-y-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Blog Post
+            </p>
+            <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
+              {post.title}
+            </h1>
+            {post.brief ? (
+              <p className="text-base text-muted-foreground md:text-lg">
+                {post.brief}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {formattedDate ? <span>{formattedDate}</span> : null}
+              {formattedDate && post.readTimeInMinutes ? (
+                <span aria-hidden="true">•</span>
+              ) : null}
+              {post.readTimeInMinutes ? (
+                <span>{post.readTimeInMinutes} min read</span>
+              ) : null}
+            </div>
+          </div>
+          {post.coverImage?.url ? (
+            <div className="overflow-hidden rounded-3xl border border-foreground/10 bg-foreground/5">
+              <img
+                src={post.coverImage.url}
+                alt={post.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : null}
+        </header>
+        <div className="prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4 prose-pre:bg-foreground/5">
+          {post.content?.html ? (
+            <div dangerouslySetInnerHTML={{ __html: post.content.html }} />
+          ) : (
+            <p className="text-sm text-muted-foreground">No content available.</p>
+          )}
+        </div>
+      </article>
+    </div>
   );
 }

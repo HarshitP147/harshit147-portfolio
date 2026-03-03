@@ -78,6 +78,7 @@
 - Prefer extending `src/components/ui/*` patterns rather than creating one-off form controls.
 - Default to existing project libraries/frameworks/components before adding new ones or implementing custom versions.
 - Keep `ModelCanvas` interactions constrained for UX consistency.
+- Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` should mirror placement and styling for its "Go back" link (top-left, muted, underline offset).
 - Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
 - Keep imports alias-first (`@/...`) instead of long relative paths.
 - Maintain TypeScript strict compatibility.
@@ -96,8 +97,9 @@
 - `ApolloNextAppProvider` in `src/app/ApolloWrapper.tsx` is required; plain `ApolloProvider` breaks streaming hooks.
 - Apollo hooks should be imported from `@apollo/client/react`.
 - `ApolloClient` and `InMemoryCache` come from `@apollo/client-integration-nextjs`, but `HttpLink` comes from `@apollo/client`.
+- `ApolloClient` from `@apollo/client-integration-nextjs` is not generic; do not use `ApolloClient<NormalizedCacheObject>`.
 - Hashnode GraphQL endpoint is `https://gql.hashnode.com`.
-- Hashnode `posts(first: ...)` has a max of 50; requests above 50 return `BAD_USER_INPUT`.
+- Hashnode `posts(pageSize: ...)` cap is 20; requests above 20 return `BAD_USER_INPUT`.
 - Blog queries should include `publication { id }` and `post { id }` for cache normalization.
 - Blog list cards and detail view use `slug`, `publishedAt`, and `readTimeInMinutes`.
 - GraphQL operations are defined in TSX files via `gql` and Codegen extracts types from them.
