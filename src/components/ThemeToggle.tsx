@@ -33,14 +33,8 @@ function applyTheme(theme: ThemeMode) {
 }
 
 export default function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = useState<ThemeMode>("light")
+  const [theme, setTheme] = useState<ThemeMode>(() => getPreferredTheme())
   const switchId = useId()
-
-  useEffect(() => {
-    const preferred = getPreferredTheme()
-    setTheme(preferred)
-    applyTheme(preferred)
-  }, [])
 
   useEffect(() => {
     applyTheme(theme)

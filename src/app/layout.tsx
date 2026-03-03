@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ApolloWrapper from "@/app/ApolloWrapper";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
 const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
@@ -18,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Harshit Pandit | Software Engineer",
+  title: "Harshit Pandit",
   description: "Software Engineer with a passion for building scalable and efficient applications. Experienced in full-stack development, cloud computing, and DevOps practices. Always eager to learn new technologies and improve my skills.",
 };
 
@@ -43,7 +45,8 @@ export default function RootLayout({
             } catch (e) {}
           })();
         `}</Script>
-        {children}
+        <ApolloWrapper>{children}</ApolloWrapper>
+        <ScrollToTop />
         <Analytics />
         <SpeedInsights />
       </body>

@@ -161,6 +161,15 @@
     @apply bg-background text-foreground;
     transition: background-color 500ms ease, color 500ms ease;
   }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

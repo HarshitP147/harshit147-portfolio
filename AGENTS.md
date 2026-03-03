@@ -69,6 +69,7 @@
 - Preserve App Router structure and keep route-level files in `src/app`.
 - Use existing design tokens from `globals.css` before introducing new colors.
 - Prefer extending `src/components/ui/*` patterns rather than creating one-off form controls.
+- Default to existing project libraries/frameworks/components before adding new ones or implementing custom versions.
 - Keep `ModelCanvas` interactions constrained for UX consistency.
 - Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
 - Keep imports alias-first (`@/...`) instead of long relative paths.
@@ -82,6 +83,24 @@
 - Add metadata entry to `icons` array in `src/components/TechMarquee.tsx`.
 - Tune scene lighting/shadows:
 - Update light/floor/contact shadow settings in `src/components/ModelCanvas.tsx`.
+
+## Recent Additions and Pitfalls
+- Hashnode blog data uses Apollo Client with Next.js App Router streaming:
+- `ApolloNextAppProvider` in `src/app/ApolloWrapper.tsx` is required; plain `ApolloProvider` breaks streaming hooks.
+- Apollo hooks should be imported from `@apollo/client/react`.
+- `ApolloClient` and `InMemoryCache` come from `@apollo/client-integration-nextjs`, but `HttpLink` comes from `@apollo/client`.
+- Hashnode GraphQL endpoint is `https://gql.hashnode.com`.
+- Hashnode `posts(first: ...)` has a max of 50; requests above 50 return `BAD_USER_INPUT`.
+- Blog queries should include `publication { id }` and `post { id }` for cache normalization.
+- Env vars:
+- `HASHNODE_PUBLICATION_HOST` (server) and `NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST` (client) must be set.
+- Apollo cache is persisted to `localStorage` under `apollo-cache-v1` for local-first behavior.
+- The cache persist link uses an `Observable` wrapper; do not call `.map()` on `forward(...)`.
+- Theme toggle must initialize from stored preference to avoid theme flipping on navigation.
+- `framer-motion` must only be used in client components; use a wrapper like `src/components/BackToHomeLink.tsx`.
+- Scroll-to-top button is fixed bottom-center; pages with footer text may need extra bottom padding to avoid overlap.
+- Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
+- Homepage "My Blogs" uses `HomeLatestBlogs` and shows "Read more" only when `pageInfo.hasNextPage`.
 
 ## Validation Checklist
 - Run `npm run lint` after significant UI or TS changes.
