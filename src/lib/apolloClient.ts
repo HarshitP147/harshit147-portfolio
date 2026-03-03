@@ -1,12 +1,11 @@
 import { ApolloLink, HttpLink, Observable, from } from "@apollo/client";
-import type { NormalizedCacheObject } from "@apollo/client";
 import { ApolloClient, InMemoryCache } from "@apollo/client-integration-nextjs";
 
 const HASHNODE_GQL_ENDPOINT =
   process.env.NEXT_PUBLIC_HASHNODE_GQL_ENDPOINT ?? "https://gql.hashnode.com";
 const CACHE_KEY = "apollo-cache-v1";
 
-let browserClient: ApolloClient<NormalizedCacheObject> | null = null;
+let browserClient: ApolloClient | null = null;
 
 function createCache() {
   return new InMemoryCache({
@@ -59,10 +58,12 @@ export function createApolloClient() {
   const persistLink =
     typeof window !== "undefined"
       ? new ApolloLink((operation, forward) => {
-          if (!forward) {
-            return null;
-          }
           return new Observable((observer) => {
+            if (!forward) {
+              observer.complete();
+              return;
+            }
+
             const subscription = forward(operation).subscribe({
               next: (result) => {
                 try {
