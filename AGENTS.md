@@ -19,9 +19,12 @@
 - `src/app/layout.tsx`: Global font setup (`Outfit`, `Geist`, `Geist Mono`) and Vercel telemetry components.
 - `src/app/page.tsx`: Homepage composition (`NameGradient`, `ModelCanvas`, `TechMarquee`).
 - `src/app/globals.css`: Theme tokens, animations, marquee styles, and global Tailwind layers.
+- `src/app/blog/[slug]/page.tsx`: Individual blog post route wrapper (Hashnode).
 - `src/components/ModelCanvas.tsx`: 3D scene setup, GLB loading, lighting, floor, shadows, controls, intro spin behavior.
 - `src/components/NameGradient.tsx`: Alternating gradient hero name text animation.
 - `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
+- `src/components/BlogPostCard.tsx`: Shared blog card + skeleton for home and blog index.
+- `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode content.html + metadata).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
 - `public/scene.glb`: Main 3D model asset loaded by the homepage scene.
@@ -38,6 +41,7 @@
 - Primary route is a split hero layout with text content and a square 3D canvas.
 - `NameGradient` toggles between blue and red gradient themes every 12 seconds.
 - `TechMarquee` renders two opposing-direction marquee rows and pauses animation on hover/focus.
+- `HomeLatestBlogs` uses `BlogPostCard` (compact) and links to `/blog/[slug]`.
 
 ## 3D Scene Notes (`src/components/ModelCanvas.tsx`)
 - GLB source path is hardcoded to `/scene.glb`.
@@ -58,6 +62,7 @@
 - `.gradient-layer`, `.gradient-blue`, `.gradient-red`
 - `.marquee`, `.marquee-track`, `.marquee-right`
 - Keyframes for marquee, blink, spin, and pulse.
+- Utility class `.line-clamp-3` is defined in `globals.css`.
 
 ## UI Component Conventions
 - UI primitives are authored as composable wrappers around `@base-ui/react`.
@@ -92,6 +97,7 @@
 - Hashnode GraphQL endpoint is `https://gql.hashnode.com`.
 - Hashnode `posts(first: ...)` has a max of 50; requests above 50 return `BAD_USER_INPUT`.
 - Blog queries should include `publication { id }` and `post { id }` for cache normalization.
+- Blog list cards and detail view use `slug`, `publishedAt`, and `readTimeInMinutes`.
 - Env vars:
 - `HASHNODE_PUBLICATION_HOST` (server) and `NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST` (client) must be set.
 - Apollo cache is persisted to `localStorage` under `apollo-cache-v1` for local-first behavior.

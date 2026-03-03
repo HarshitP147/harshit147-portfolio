@@ -4,7 +4,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useState } from "react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
 
 type BlogPostsApolloLoggerProps = {
   publicationHost: string;
@@ -21,7 +21,10 @@ const PUBLICATION_POSTS_QUERY = gql`
             id
             title
             brief
+            slug
             url
+            publishedAt
+            readTimeInMinutes
             coverImage {
               url
             }
@@ -64,16 +67,7 @@ export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApol
     return (
       <div className="grid gap-y-6 gap-x-8 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Card
-            key={`skeleton-${index}`}
-            className="overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5"
-          >
-            <div className="h-32 w-full animate-pulse bg-foreground/10" />
-            <CardContent className="space-y-2 p-3">
-              <div className="h-4 w-3/4 animate-pulse rounded-full bg-foreground/10" />
-              <div className="h-4 w-1/2 animate-pulse rounded-full bg-foreground/10" />
-            </CardContent>
-          </Card>
+          <BlogPostCardSkeleton key={`skeleton-${index}`} />
         ))}
       </div>
     );
@@ -85,8 +79,30 @@ export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApol
 
   const posts =
     cachedPosts
-      ?.map((edge: { node?: { id: string; title: string; coverImage?: { url?: string | null } | null } | null }) => edge?.node)
-      .filter((node: { id?: string } | null | undefined): node is { id: string; title: string; coverImage?: { url?: string | null } | null } => Boolean(node?.id)) ?? [];
+      ?.map(
+        (edge: {
+          node?: {
+            id: string;
+            title: string;
+            brief?: string | null;
+            slug?: string | null;
+            publishedAt?: string | null;
+            readTimeInMinutes?: number | null;
+            coverImage?: { url?: string | null } | null;
+          } | null;
+        }) => edge?.node,
+      )
+      .filter(
+        (node: { id?: string; slug?: string | null } | null | undefined): node is {
+          id: string;
+          title: string;
+          brief?: string | null;
+          slug: string;
+          publishedAt?: string | null;
+          readTimeInMinutes?: number | null;
+          coverImage?: { url?: string | null } | null;
+        } => Boolean(node?.id && node?.slug),
+      ) ?? [];
 
   if (posts.length === 0) {
     return <p className="text-sm text-muted-foreground">No posts found yet.</p>;
@@ -95,28 +111,15 @@ export default function BlogPostsApolloLogger({ publicationHost }: BlogPostsApol
   return (
     <div className="grid gap-y-6 gap-x-8 md:grid-cols-2 xl:grid-cols-3">
       {posts.map((post) => (
-        <Card
+        <BlogPostCard
           key={post.id}
-          className="overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5"
-        >
-          <div className="h-32 w-full bg-foreground/10">
-            {post.coverImage?.url ? (
-              <img
-                src={post.coverImage.url}
-                alt={post.title}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                No image
-              </div>
-            )}
-          </div>
-          <CardHeader className="p-3">
-            <h2 className="text-sm font-semibold">{post.title}</h2>
-          </CardHeader>
-        </Card>
+          title={post.title}
+          slug={post.slug}
+          brief={post.brief}
+          coverImageUrl={post.coverImage?.url ?? null}
+          publishedAt={post.publishedAt ?? null}
+          readTimeInMinutes={post.readTimeInMinutes ?? null}
+        />
       ))}
     </div>
   );

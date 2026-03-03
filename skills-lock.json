@@ -6,6 +6,16 @@
       "sourceType": "github",
       "computedHash": "ae82ac8ee2b1de548a83ebee3c470391aa11ba2948ccd79448b9c9101384016e"
     },
+    "apollo-mcp-server": {
+      "source": "apollographql/skills",
+      "sourceType": "github",
+      "computedHash": "20cf354f80b042b67a09a316fa5a3c7d547eb8d36ad8a01dc7f1b7aa5737085a"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "6412eb4eb3b91595ebab937f0c69501240e7ba761b3d82510b5cf506ec5c7adc"
+    },
     "hashnode-api": {
       "source": "rawveg/skillsforge-marketplace",
       "sourceType": "github",
