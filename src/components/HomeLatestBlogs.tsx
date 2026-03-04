@@ -5,6 +5,7 @@ import { useQuery } from "@apollo/client/react";
 import { motion } from "framer-motion";
 
 import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
+import { sectionTitleClassName } from "@/components/sectionStyles";
 import type {
   UserLatestPostsQuery,
   UserLatestPostsQueryVariables,
@@ -53,8 +54,8 @@ export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
   if (loading) {
     return (
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">My Blogs</h2>
+        <div className="flex items-center justify-center xl:justify-between">
+          <h2 className={sectionTitleClassName()}>My Blogs</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -82,12 +83,12 @@ export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center md:flex-row md:items-center md:justify-between md:text-left">
-        <h2 className="text-lg font-semibold">My Blogs</h2>
+      <div className="flex flex-col items-center gap-2 text-center xl:flex-row xl:items-center xl:justify-between xl:text-left">
+        <h2 className={sectionTitleClassName()}>My Blogs</h2>
         {hasMore ? (
           <motion.a
             href="/blog"
-            className="hidden text-sm text-muted-foreground md:inline-flex"
+            className="hidden text-sm text-muted-foreground xl:inline-flex"
             whileHover={{ color: "rgb(147, 197, 253)", textDecoration: "underline" }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             style={{ textUnderlineOffset: "4px" }}
@@ -119,7 +120,7 @@ export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
         ))}
       </div>
       {hasMore ? (
-        <div className="flex justify-center md:hidden">
+        <div className="flex justify-center xl:hidden">
           <motion.a
             href="/blog"
             className="text-sm text-muted-foreground"

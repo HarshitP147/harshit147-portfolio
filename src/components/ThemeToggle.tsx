@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useId, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 
 import { Sun, Moon } from "lucide-react"
 
@@ -12,13 +12,17 @@ type ThemeMode = "light" | "dark"
 const STORAGE_KEY = "theme"
 
 function getPreferredTheme(): ThemeMode {
-  if (typeof window === "undefined") {
-    return "light"
-  }
-
   const saved = window.localStorage.getItem(STORAGE_KEY)
   if (saved === "light" || saved === "dark") {
     return saved
+  }
+
+  const cookieTheme = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("theme="))
+  const cookieValue = cookieTheme ? cookieTheme.split("=")[1] : null
+  if (cookieValue === "light" || cookieValue === "dark") {
+    return cookieValue
   }
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -32,11 +36,28 @@ function applyTheme(theme: ThemeMode) {
   root.classList.add(theme)
 }
 
-export default function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = useState<ThemeMode>(() => getPreferredTheme())
+export default function ThemeToggle({
+  className,
+  initialTheme,
+}: {
+  className?: string
+  initialTheme?: ThemeMode
+}) {
+  const [theme, setTheme] = useState<ThemeMode>(initialTheme ?? "light")
   const switchId = useId()
+  const didInit = useRef(false)
 
   useEffect(() => {
+    if (!didInit.current) {
+      const preferred = getPreferredTheme()
+      didInit.current = true
+      setTheme(preferred)
+      applyTheme(preferred)
+      window.localStorage.setItem(STORAGE_KEY, preferred)
+      document.cookie = `theme=${preferred}; path=/; max-age=31536000; samesite=lax`
+      return
+    }
+
     applyTheme(theme)
     window.localStorage.setItem(STORAGE_KEY, theme)
     document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`
@@ -44,9 +65,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
 
   const isDark = theme === "dark"
   return (
-    <div
-  className={cn("flex items-center justify-center", className)}
-  >
+    <div className={cn("flex items-center justify-center", className)}>
       <Switch
         id={switchId}
         checked={isDark}

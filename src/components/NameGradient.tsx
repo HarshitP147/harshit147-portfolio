@@ -21,7 +21,7 @@ export default function NameGradient({
     return () => clearInterval(interval);
   }, []);
 
-  const textClass = " whitespace-normal lg:whitespace-nowrap";
+  const textClass = " whitespace-normal xl:whitespace-nowrap";
 
   return (
     <span className={`relative block ${className}`.trim()}>
@@ -45,4 +45,3 @@ export default function NameGradient({
     </span>
   );
 }
-

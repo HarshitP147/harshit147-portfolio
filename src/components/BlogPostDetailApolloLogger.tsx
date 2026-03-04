@@ -6,10 +6,12 @@ import { ArrowUpRight, Clock3 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
+import LikeButton from "@/components/LikeButton";
 import type {
   PostIdBySlugQuery,
   PostIdBySlugQueryVariables,
@@ -171,13 +173,39 @@ function GoBackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+function PostDetailSkeleton() {
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <div className="h-6 w-40 animate-pulse rounded-full bg-foreground/10" />
+      <div className="h-10 w-3/4 animate-pulse rounded-full bg-foreground/10" />
+      <div className="h-5 w-full animate-pulse rounded-full bg-foreground/10" />
+      <div className="aspect-[16/9] w-full animate-pulse rounded-3xl bg-foreground/10" />
+      <div className="space-y-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={`post-skeleton-${index}`}
+            className="h-4 w-full animate-pulse rounded-full bg-foreground/10"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function BlogPostDetailApolloLogger({
   publicationHost,
   slug,
 }: BlogPostDetailApolloLoggerProps) {
   const router = useRouter();
   const client = useApolloClient();
-  const cachedPostId = resolvePostIdBySlug(client.cache.extract(), slug);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+  const cachedPostId = hasHydrated
+    ? resolvePostIdBySlug(client.cache.extract(), slug)
+    : null;
 
   const {
     data: postIdBySlugData,
@@ -187,7 +215,7 @@ export default function BlogPostDetailApolloLogger({
     variables: { host: publicationHost, slug },
     fetchPolicy: "cache-first",
     nextFetchPolicy: "cache-first",
-    skip: Boolean(cachedPostId),
+    skip: !hasHydrated || Boolean(cachedPostId),
   });
 
   const postIdFromList = postIdBySlugData?.publication?.post?.id ?? null;
@@ -199,28 +227,17 @@ export default function BlogPostDetailApolloLogger({
     PostByIdQueryVariables
   >(POST_BY_ID_QUERY, {
     variables: { id: postId ?? "" },
-    skip: !postId,
+    skip: !hasHydrated || !postId,
     fetchPolicy: "cache-first",
     nextFetchPolicy: "cache-first",
   });
 
+  if (!hasHydrated) {
+    return <PostDetailSkeleton />;
+  }
+
   if (postIdBySlugLoading && !postId) {
-    return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <div className="h-6 w-40 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-10 w-3/4 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-5 w-full animate-pulse rounded-full bg-foreground/10" />
-        <div className="aspect-[16/9] w-full animate-pulse rounded-3xl bg-foreground/10" />
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`post-id-skeleton-${index}`}
-              className="h-4 w-full animate-pulse rounded-full bg-foreground/10"
-            />
-          ))}
-        </div>
-      </div>
-    );
+    return <PostDetailSkeleton />;
   }
 
   if (postIdBySlugError) {
@@ -239,22 +256,7 @@ export default function BlogPostDetailApolloLogger({
   }
 
   if (loading) {
-    return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <div className="h-6 w-40 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-10 w-3/4 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-5 w-full animate-pulse rounded-full bg-foreground/10" />
-        <div className="aspect-[16/9] w-full animate-pulse rounded-3xl bg-foreground/10" />
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`post-skeleton-${index}`}
-              className="h-4 w-full animate-pulse rounded-full bg-foreground/10"
-            />
-          ))}
-        </div>
-      </div>
-    );
+    return <PostDetailSkeleton />;
   }
 
   if (error) {
@@ -344,7 +346,11 @@ export default function BlogPostDetailApolloLogger({
             <p className="text-sm text-muted-foreground">No content available.</p>
           )}
         </div>
-        <hr className="my-6 w-full border-border/70" />
+        <div className="my-6 flex w-full items-center gap-4 text-muted-foreground">
+          <span className="h-px flex-1 bg-border/70" />
+          <LikeButton postId={post.id ?? post.slug} />
+          <span className="h-px flex-1 bg-border/70" />
+        </div>
       </article>
     </div>
   );

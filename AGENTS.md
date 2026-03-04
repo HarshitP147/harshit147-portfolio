@@ -7,6 +7,9 @@
 - UI primitives: Base UI wrappers in `src/components/ui/*`.
 - 3D: Three.js via React Three Fiber (`@react-three/fiber`) and Drei (`@react-three/drei`).
 - Analytics: Vercel Analytics + Speed Insights are mounted in the root layout.
+- Blog likes: Upstash Redis (Vercel KV-compatible) via `@upstash/redis` with optimistic client UI.
+- Homepage sections use shared class helpers from `src/components/sectionStyles.ts` for consistent alignment.
+- Homepage is expected to avoid horizontal scrolling unless explicitly requested.
 
 ## Runtime and Tooling
 - Package manager: `npm`.
@@ -21,11 +24,14 @@
 - `src/app/page.tsx`: Homepage composition (`NameGradient`, `ModelCanvas`, `TechMarquee`).
 - `src/app/globals.css`: Theme tokens, animations, marquee styles, and global Tailwind layers.
 - `src/app/blog/[slug]/page.tsx`: Individual blog post route wrapper (Hashnode).
+- `src/app/api/likes/[postId]/route.ts`: Likes API (`GET` read, `POST` like, `DELETE` unlike) backed by Upstash Redis.
 - `src/components/ModelCanvas.tsx`: 3D scene setup, GLB loading, lighting, floor, shadows, controls, intro spin behavior.
 - `src/components/NameGradient.tsx`: Alternating gradient hero name text animation.
 - `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
 - `src/components/BlogPostCard.tsx`: Shared blog card + skeleton for home and blog index.
 - `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode markdown + embeds + metadata).
+- `src/components/LikeButton.tsx`: Blog like/unlike control with optimistic updates and animated SVG heart.
+- `src/components/sectionStyles.ts`: Shared section container/title class helpers for consistent homepage spacing/alignment.
 - `src/lib/graphql/generated.ts`: GraphQL Codegen output (types + typed documents).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
@@ -42,13 +48,20 @@
 ## Homepage Behavior
 - Primary route is a split hero layout with text content and a square 3D canvas.
 - `NameGradient` toggles between blue and red gradient themes every 12 seconds.
+- `NameGradient` keeps wrapping on smaller screens and switches to no-wrap at `xl`.
 - `TechMarquee` renders two opposing-direction marquee rows and pauses animation on hover/focus.
 - `HomeLatestBlogs` uses `BlogPostCard` (compact) and links to `/blog/[slug]`.
+- A single page-level container shell (`sectionShellClassName`) is used to keep section headings aligned to identical left/right bounds.
+- The shared shell uses `max-w-5xl` and `px-4`.
+- Homepage section titles (`Hi, I&apos;m`, `Languages and Tools`, `My Blogs`) use shared title styling.
+- Title alignment is responsive: centered on mobile/tablet, left-aligned from `xl` and above.
+- Hero switches to two-column layout at `xl` to prevent medium-breakpoint horizontal overflow.
 
 ## 3D Scene Notes (`src/components/ModelCanvas.tsx`)
 - GLB source path is hardcoded to `/scene.glb`.
 - Meshes in the loaded scene are traversed and set to cast/receive shadows.
-- The model starts with a fast rotation burst and eases to a slow display rotation.
+- Idle motion rotates the camera via `OrbitControls` auto-rotation; the model itself remains static.
+- Camera auto-rotation starts fast on load and eases to a slower speed within about one second.
 - Auto-rotation stops permanently once user interaction begins (`OrbitControls` `onStart`).
 - Floor plane is auto-positioned from model bounding box min Y and receives shadows.
 - `OrbitControls` constraints:
@@ -77,6 +90,12 @@
 - Use existing design tokens from `globals.css` before introducing new colors.
 - Prefer extending `src/components/ui/*` patterns rather than creating one-off form controls.
 - Default to existing project libraries/frameworks/components before adding new ones or implementing custom versions.
+- On homepage, keep horizontal spacing ownership at page level (`sectionShellClassName`) instead of nested per-section shells.
+- For homepage headings, use `sectionTitleClassName` to preserve consistent typography and responsive alignment.
+- Keep homepage breakpoint behavior consistent:
+- headings and hero text align center below `xl`, left at `xl+`.
+- hero two-column split starts at `xl`.
+- Avoid introducing horizontal overflow in medium breakpoints.
 - Keep `ModelCanvas` interactions constrained for UX consistency.
 - Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` should mirror placement and styling for its "Go back" link (top-left, muted, underline offset).
 - Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
@@ -91,6 +110,8 @@
 - Add metadata entry to `icons` array in `src/components/TechMarquee.tsx`.
 - Tune scene lighting/shadows:
 - Update light/floor/contact shadow settings in `src/components/ModelCanvas.tsx`.
+- Reset likes for a post in Upstash:
+- Delete key `likes:post:<postId>` (or set to `0`) in the Redis console.
 
 ## Recent Additions and Pitfalls
 - Hashnode blog data uses Apollo Client with Next.js App Router streaming:
@@ -114,11 +135,22 @@
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
 - Homepage "My Blogs" uses `HomeLatestBlogs` and shows "Read more" only when `pageInfo.hasNextPage`.
 - Blog detail uses `publication(host).post(slug)` to resolve post ID, then `post(id)` for full content.
+- `BlogPostDetailApolloLogger` gates Apollo queries behind hydration to avoid SSR/client mismatches.
 - Blog content renders Markdown via `react-markdown` + `remark-gfm` + `rehype-raw`.
 - Hashnode embeds use `%[url]` syntax and are transformed into iframes (e.g. CodeSandbox).
 - Hashnode callouts render via `[data-node-type="callout"]` and are styled in `globals.css`.
 - Blog images use `next/image` (cards, cover, and markdown content).
 - `next.config.ts` must allow Hashnode image domains (`cdn.hashnode.com`, `*.hashnode.com`).
+- Likes implementation details:
+- API routes are in `src/app/api/likes/[postId]/route.ts` and use `@upstash/redis` `Redis.fromEnv()`.
+- Likes key format is `likes:post:${postId}`.
+- Required env vars for likes: `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or Upstash equivalents `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`).
+- In Next.js 16 dynamic route handlers, `params` is async: type as `params: Promise<{ postId: string }>` and `await params` before property access.
+- `DELETE` (unlike) clamps likes to `>= 0` and normalizes zero values.
+- `LikeButton` is rendered on blog detail at the bottom separator, centered between two horizontal lines.
+- `LikeButton` uses an inline SVG heart (not lucide) animated with `framer-motion`.
+- Like/unlike UI is optimistic with rollback on request failure/timeout (8s).
+- Duplicate-like prevention is client-side only via `localStorage` key `liked:post:${postId}` (not server-enforced identity).
 
 ## Validation Checklist
 - Run `npm run lint` after significant UI or TS changes.
@@ -127,3 +159,11 @@
 - Controls cannot orbit below floor.
 - Shadows remain visible and performant.
 - For style changes, verify both desktop and mobile layout behavior.
+- For homepage layout changes, verify:
+- `Hi, I&apos;m`, `Languages and Tools`, and `My Blogs` share the same horizontal container edges on large screens.
+- The same titles are centered on mobile/tablet and switch to left-aligned from `xl`.
+- No horizontal scrolling appears across breakpoints unless intentionally introduced.
+- For likes changes, verify:
+- First render shows stable count and correct singular/plural label (`Like` vs `Likes`).
+- Slow network still feels responsive (optimistic update), and UI rolls back on failed requests.
+- Like/unlike works across multiple browsers without hydration or route-param warnings.

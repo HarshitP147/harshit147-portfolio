@@ -9,6 +9,7 @@ import {
   useGLTF,
 } from "@react-three/drei";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 function Model() {
   const { scene } = useGLTF("/scene.glb");
@@ -27,32 +28,33 @@ function Model() {
 
 useGLTF.preload("/scene.glb");
 
-const FAST_SPEED = 5.0;   // rad/s — burst on load
-const SLOW_SPEED = 0.45;  // rad/s — idle display spin
-const FAST_DURATION = 1.0; // seconds before slowing down
+const FAST_SPEED = 80.0;
+const SLOW_SPEED = 1.0;
+const FAST_DURATION = 0.8;
 
 function Scene() {
   const [floor, setFloor] = useState({ y: -0.9 });
-  const modelGroupRef = useRef<THREE.Group | null>(null);
-  const rotatingRef = useRef(true);          // ref avoids stale-closure issues in useFrame
-  const spinSpeedRef = useRef(FAST_SPEED);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const elapsedRef = useRef(0);
+  const speedRef = useRef(FAST_SPEED);
+  const hasInteractedRef = useRef(false);
   const floorSetRef = useRef(false);
 
   useFrame((_, delta) => {
-    if (!rotatingRef.current || !modelGroupRef.current) return;
+    if (!autoRotate || hasInteractedRef.current || !controlsRef.current) {
+      return;
+    }
 
     elapsedRef.current += delta;
 
-    // After the fast burst, switch target to slow speed with a snappier damping
     const isFastPhase = elapsedRef.current < FAST_DURATION;
     const targetSpeed = isFastPhase ? FAST_SPEED : SLOW_SPEED;
-    const dampingFactor = isFastPhase ? 2 : 7; // 7 → slows down quickly once the burst ends
-
+    const dampingFactor = isFastPhase ? 2 : 7;
     const t = 1 - Math.exp(-dampingFactor * delta);
-    spinSpeedRef.current = THREE.MathUtils.lerp(spinSpeedRef.current, targetSpeed, t);
 
-    modelGroupRef.current.rotation.y += spinSpeedRef.current * delta;
+    speedRef.current = THREE.MathUtils.lerp(speedRef.current, targetSpeed, t);
+    controlsRef.current.autoRotateSpeed = speedRef.current;
   });
 
   return (
@@ -65,7 +67,7 @@ function Scene() {
         shadow-radius={4}
       />
       <Suspense fallback={null}>
-        <group ref={modelGroupRef}>
+        <group>
           <Center
             onCentered={({ boundingBox }) => {
               if (floorSetRef.current) return;
@@ -93,11 +95,17 @@ function Scene() {
         far={6}
       />
       <OrbitControls
+        ref={controlsRef}
         enablePan={false}
         maxPolarAngle={Math.PI / 2 - 0.05}
         minDistance={1.4}
         maxDistance={5}
-        onStart={() => { rotatingRef.current = false; }}
+        autoRotate={autoRotate}
+        autoRotateSpeed={FAST_SPEED}
+        onStart={() => {
+          hasInteractedRef.current = true;
+          setAutoRotate(false);
+        }}
       />
     </>
   );

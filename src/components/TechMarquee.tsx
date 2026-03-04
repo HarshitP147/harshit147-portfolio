@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { sectionTitleClassName } from "@/components/sectionStyles";
 
 type TechItem = {
   label: string;
@@ -89,10 +90,8 @@ function MarqueeRow({ items, direction = "left", duration = "32s" }: MarqueeRowP
 export default function TechMarquee() {
   return (
     <section className="w-full py-16 text-foreground">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6">
-        <p className="text-center text-sm text-muted-foreground">
-          Languages and tools
-        </p>
+      <div className="flex flex-col gap-6">
+        <h2 className={sectionTitleClassName()}>Languages and Tools</h2>
         <div className="space-y-6">
           <MarqueeRow items={rowOne} direction="left" duration="28s" />
           <MarqueeRow items={rowTwo} direction="right" duration="32s" />
