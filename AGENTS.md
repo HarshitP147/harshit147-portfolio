@@ -25,7 +25,7 @@
 - `src/components/NameGradient.tsx`: Alternating gradient hero name text animation.
 - `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
 - `src/components/BlogPostCard.tsx`: Shared blog card + skeleton for home and blog index.
-- `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode content.html + metadata).
+- `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode markdown + embeds + metadata).
 - `src/lib/graphql/generated.ts`: GraphQL Codegen output (types + typed documents).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
@@ -105,13 +105,20 @@
 - GraphQL operations are defined in TSX files via `gql` and Codegen extracts types from them.
 - Env vars:
 - `HASHNODE_USERNAME` (server) and `NEXT_PUBLIC_HASHNODE_USERNAME` (client) must be set.
+- `HASHNODE_PUBLICATION_HOST` / `NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST` override the default `${username}.hashnode.dev`.
 - Apollo cache is persisted to `localStorage` under `apollo-cache-v1` for local-first behavior.
 - The cache persist link uses an `Observable` wrapper; do not call `.map()` on `forward(...)`.
-- Theme toggle must initialize from stored preference to avoid theme flipping on navigation.
+- Theme toggle must initialize from stored preference and cookie to avoid theme flipping on navigation.
 - `framer-motion` must only be used in client components; use a wrapper like `src/components/BackToHomeLink.tsx`.
 - Scroll-to-top button is fixed bottom-center; pages with footer text may need extra bottom padding to avoid overlap.
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
 - Homepage "My Blogs" uses `HomeLatestBlogs` and shows "Read more" only when `pageInfo.hasNextPage`.
+- Blog detail uses `publication(host).post(slug)` to resolve post ID, then `post(id)` for full content.
+- Blog content renders Markdown via `react-markdown` + `remark-gfm` + `rehype-raw`.
+- Hashnode embeds use `%[url]` syntax and are transformed into iframes (e.g. CodeSandbox).
+- Hashnode callouts render via `[data-node-type="callout"]` and are styled in `globals.css`.
+- Blog images use `next/image` (cards, cover, and markdown content).
+- `next.config.ts` must allow Hashnode image domains (`cdn.hashnode.com`, `*.hashnode.com`).
 
 ## Validation Checklist
 - Run `npm run lint` after significant UI or TS changes.

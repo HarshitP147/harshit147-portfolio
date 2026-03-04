@@ -100,6 +100,7 @@ export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLogge
       {posts.map((post) => (
         <BlogPostCard
           key={post.id}
+          id={post.id}
           title={post.title}
           slug={post.slug}
           brief={post.brief}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useId, useMemo, useState } from "react"
+import { useEffect, useId, useState } from "react"
 
 import { Sun, Moon } from "lucide-react"
 
@@ -39,11 +39,10 @@ export default function ThemeToggle({ className }: { className?: string }) {
   useEffect(() => {
     applyTheme(theme)
     window.localStorage.setItem(STORAGE_KEY, theme)
+    document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`
   }, [theme])
 
   const isDark = theme === "dark"
-  const label = useMemo(() => (isDark ? "Dark" : "Light"), [isDark])
-
   return (
     <div
   className={cn("flex items-center justify-center", className)}

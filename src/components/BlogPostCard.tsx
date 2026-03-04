@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -9,6 +10,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 type BlogPostCardProps = {
+  id: string;
   title: string;
   slug: string;
   brief?: string | null;
@@ -22,7 +24,6 @@ type BlogPostCardProps = {
 export function BlogPostCard({
   title,
   slug,
-  brief,
   coverImageUrl,
   publishedAt,
   readTimeInMinutes,
@@ -34,12 +35,11 @@ export function BlogPostCard({
     : null;
 
   return (
-    <Link href={`/blog/${slug}`} className="block">
+    <Link href={`/blog/${slug}`} className={cn("block w-full", className)}>
       <Card
         className={cn(
-          "group/card relative h-full gap-3 overflow-hidden border border-foreground/5 bg-card/80 py-0 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/10",
+          "group/card relative h-full w-full gap-3 overflow-hidden border border-foreground/5 bg-card/80 py-0 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/10",
           size === "compact" ? "rounded-2xl" : "rounded-3xl",
-          className,
         )}
       >
         <div
@@ -49,11 +49,16 @@ export function BlogPostCard({
           )}
         >
           {coverImageUrl ? (
-            <img
+            <Image
               src={coverImageUrl}
               alt={title}
+              fill
+              sizes={
+                size === "compact"
+                  ? "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  : "(max-width: 768px) 100vw, 50vw"
+              }
               className="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-              loading="lazy"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-foreground/10 via-transparent to-foreground/5 text-xs text-muted-foreground">

@@ -106,6 +106,7 @@ export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
         {posts.map((post) => (
           <BlogPostCard
             key={post.id}
+            id={post.id}
             title={post.title}
             slug={post.slug}
             brief={post.brief}
