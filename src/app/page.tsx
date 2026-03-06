@@ -17,15 +17,20 @@ export default async function Home() {
     <div className="min-h-screen bg-background font-sans text-primary-foreground">
       <div className={sectionShellClassName()}>
         <main className="flex flex-col-reverse items-center justify-center gap-10 pb-10 pt-20 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
-          <div className="flex w-full my-auto flex-col items-center gap-2 pt-6 text-center xl:items-start xl:mt-[12%] xl:pt-4 xl:text-left">
-            <p className={sectionTitleClassName()}>
-              Hi, I&apos;m
+          <div className="flex w-full my-auto flex-col items-center gap-6 pt-6 text-center xl:items-start xl:pt-4 xl:text-left">
+            <div className="xl:-translate-y-62">
+              <p className={sectionTitleClassName()}>
+                Hi, I&apos;m
+              </p>
+              <h1 className="max-w-[12ch] text-5xl font-semibold uppercase tracking-[0.08em] sm:max-w-none sm:text-6xl xl:text-7xl">
+                <NameGradient />
+              </h1>
+            </div>
+            <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
+              I have a Bachelors of Engineering in Computer Engineering from Trinity College Dublin. I have a keen interest in artificial intelligence,  web development and computer graphics.
             </p>
-            <h1 className="max-w-[12ch] text-5xl font-semibold uppercase tracking-[0.08em] sm:max-w-none sm:text-6xl xl:text-7xl">
-              <NameGradient />
-            </h1>
-            <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:mt-20 xl:text-left">
-              I am a Software Engineer based in Dublin currently working as an Intern at{" "}
+            <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
+              I currently work as a Fullstack Developer Intern at{" "}
               <a
                 href="https://www.linkedin.com/company/gaddr/"
                 target="_blank"
@@ -33,8 +38,8 @@ export default async function Home() {
                 className="font-medium underline underline-offset-4"
               >
                 Gaddr
-              </a>. 
-              I have a passion for building tools that empower developers and enhance productivity. I am currently exploring the world of AI and their applications in our daily lives.
+              </a>.
+        
             </p>
           </div>
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">

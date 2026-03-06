@@ -28,11 +28,49 @@ function Model() {
 
 useGLTF.preload("/scene.glb");
 
-const FAST_SPEED = 80.0;
-const SLOW_SPEED = 1.0;
-const FAST_DURATION = 0.8;
+const FAST_SPEED = 350.0;
+const SLOW_SPEED = 7.0;
+const FAST_DURATION = 0.7;
+const SCENE_FLOOR_COLOR = "#36261b";
+const LIGHT_SCENE_VISUALS = {
+  skyColor: "#dfe8f8",
+  shadowOpacity: 0.58,
+  shadowColor: "#1f1712",
+};
+const DARK_SCENE_VISUALS = {
+  skyColor: "#0f0f12",
+  shadowOpacity: 1,
+  shadowColor: "#000000",
+};
 
-function Scene() {
+function isDarkTheme() {
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const root = document.documentElement;
+  if (root.classList.contains("dark")) {
+    return true;
+  }
+
+  if (root.classList.contains("light")) {
+    return false;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function getSceneVisuals() {
+  return isDarkTheme() ? DARK_SCENE_VISUALS : LIGHT_SCENE_VISUALS;
+}
+
+function Scene({
+  shadowOpacity,
+  shadowColor,
+}: {
+  shadowOpacity: number;
+  shadowColor: string;
+}) {
   const [floor, setFloor] = useState({ y: -0.9 });
   const [autoRotate, setAutoRotate] = useState(true);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -85,11 +123,12 @@ function Scene() {
         receiveShadow
       >
         <planeGeometry args={[200, 200]} />
-        <meshStandardMaterial color="#36261B" roughness={0.9} />
+        <meshStandardMaterial color={SCENE_FLOOR_COLOR} roughness={0.9} />
       </mesh>
       <ContactShadows
         position={[0, floor.y + 0.01, 0]}
-        opacity={1}
+        opacity={shadowOpacity}
+        color={shadowColor}
         scale={8}
         blur={2.6}
         far={6}
@@ -112,16 +151,62 @@ function Scene() {
 }
 
 export default function ModelCanvas() {
+  const [sceneVisuals, setSceneVisuals] = useState(getSceneVisuals);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const darkMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const syncSceneVisuals = () => {
+      const nextSceneVisuals = getSceneVisuals();
+      setSceneVisuals((currentSceneVisuals) =>
+        currentSceneVisuals.skyColor === nextSceneVisuals.skyColor &&
+        currentSceneVisuals.shadowOpacity === nextSceneVisuals.shadowOpacity &&
+        currentSceneVisuals.shadowColor === nextSceneVisuals.shadowColor
+          ? currentSceneVisuals
+          : nextSceneVisuals,
+      );
+    };
+
+    const observer = new MutationObserver(() => {
+      syncSceneVisuals();
+    });
+
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    darkMediaQuery.addEventListener("change", syncSceneVisuals);
+
+    const frame = window.requestAnimationFrame(syncSceneVisuals);
+
+    return () => {
+      observer.disconnect();
+      darkMediaQuery.removeEventListener("change", syncSceneVisuals);
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
     <div className="relative h-[360px] w-full max-w-[360px] overflow-hidden rounded-3xl shadow-sm sm:h-[420px] sm:max-w-[420px]">
-      <div className="absolute inset-0 bg-[#0f0f12]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            `linear-gradient(to bottom, ${sceneVisuals.skyColor} 0%, ${sceneVisuals.skyColor} 49%, ${SCENE_FLOOR_COLOR} 49%, ${SCENE_FLOOR_COLOR} 100%)`,
+        }}
+      />
       <Canvas
         className="relative z-10"
         camera={{ position: [0, 0, 3], fov: 45 }}
         shadows
         gl={{ alpha: true }}
       >
-        <Scene />
+        <Scene
+          shadowOpacity={sceneVisuals.shadowOpacity}
+          shadowColor={sceneVisuals.shadowColor}
+        />
       </Canvas>
     </div>
   );

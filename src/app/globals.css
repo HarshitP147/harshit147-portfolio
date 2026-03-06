@@ -51,6 +51,8 @@
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
+  --scene-sky: #dfe8f8;
+  --scene-floor: #d7c2ad;
   --card: #ffffff;
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
@@ -86,6 +88,8 @@
 .dark {
   --background: #0a0a0a;
   --foreground: #fafafa;
+  --scene-sky: #0f0f12;
+  --scene-floor: #36261b;
   --card: #0a0a0a;
   --card-foreground: #fafafa;
   --popover: #0a0a0a;
@@ -121,6 +125,8 @@
   :root:not(.light) {
     --background: #0a0a0a;
     --foreground: #fafafa;
+    --scene-sky: #0f0f12;
+    --scene-floor: #36261b;
     --card: #0a0a0a;
     --card-foreground: #fafafa;
     --popover: #0a0a0a;
