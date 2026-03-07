@@ -21,17 +21,19 @@
 
 ## Repository Structure
 - `src/app/layout.tsx`: Global font setup (`Outfit`, `Geist`, `Geist Mono`) and Vercel telemetry components.
-- `src/app/page.tsx`: Homepage composition (`NameGradient`, `ModelCanvas`, `TechMarquee`).
+- `src/app/page.tsx`: Homepage composition (`NameGradient`, `ModelCanvas`, `TechMarquee`, `HomeLatestBlogs`, `HomeFeaturedProjects`).
 - `src/app/globals.css`: Theme tokens, animations, marquee styles, and global Tailwind layers.
 - `src/app/blog/[slug]/page.tsx`: Individual blog post route wrapper (Hashnode).
 - `src/app/api/likes/[postId]/route.ts`: Likes API (`GET` read, `POST` like, `DELETE` unlike) backed by Upstash Redis.
 - `src/components/ModelCanvas.tsx`: 3D scene setup, GLB loading, lighting, floor, shadows, controls, intro spin behavior.
 - `src/components/NameGradient.tsx`: Alternating gradient hero name text animation.
 - `src/components/TechMarquee.tsx`: Scrolling technology icon rows.
+- `src/components/HomeFeaturedProjects.tsx`: Homepage featured projects section with editorial rows, left-aligned mobile layout, and GitHub icon+link actions.
 - `src/components/BlogPostCard.tsx`: Shared blog card + skeleton for home and blog index.
 - `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode markdown + embeds + metadata).
 - `src/components/LikeButton.tsx`: Blog like/unlike control with optimistic updates and animated SVG heart.
 - `src/components/sectionStyles.ts`: Shared section container/title class helpers for consistent homepage spacing/alignment.
+- `src/lib/featuredProjects.ts`: Typed local data source for featured project metadata rendered on homepage.
 - `src/lib/graphql/generated.ts`: GraphQL Codegen output (types + typed documents).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
@@ -51,11 +53,15 @@
 - `NameGradient` keeps wrapping on smaller screens and switches to no-wrap at `xl`.
 - `TechMarquee` renders two opposing-direction marquee rows and pauses animation on hover/focus.
 - `HomeLatestBlogs` uses `BlogPostCard` (compact) and links to `/blog/[slug]`.
+- `HomeFeaturedProjects` renders below `My Blogs` using an editorial row layout (no thumbnails/cards).
 - A single page-level container shell (`sectionShellClassName`) is used to keep section headings aligned to identical left/right bounds.
 - The shared shell uses `max-w-5xl` and `px-4`.
-- Homepage section titles (`Hi, I&apos;m`, `Languages and Tools`, `My Blogs`) use shared title styling.
+- Homepage section titles (`Hi, I&apos;m`, `Languages and Tools`, `My Blogs`, `Projects`) use shared title styling.
 - Title alignment is responsive: centered on mobile/tablet, left-aligned from `xl` and above.
 - Hero switches to two-column layout at `xl` to prevent medium-breakpoint horizontal overflow.
+- Project rows are left-aligned on mobile and desktop, with title/domain/description/stack content in one column.
+- Project action links use a stacked icon+label and must keep icon and text color transitions in sync.
+- GitHub link hover/focus color for projects should match existing link affordances (`Read more`/`Go back` blue).
 
 ## 3D Scene Notes (`src/components/ModelCanvas.tsx`)
 - GLB source path is hardcoded to `/scene.glb`.
@@ -92,6 +98,9 @@
 - Default to existing project libraries/frameworks/components before adding new ones or implementing custom versions.
 - On homepage, keep horizontal spacing ownership at page level (`sectionShellClassName`) instead of nested per-section shells.
 - For homepage headings, use `sectionTitleClassName` to preserve consistent typography and responsive alignment.
+- Keep homepage projects in `src/lib/featuredProjects.ts` instead of hardcoding content in component markup.
+- Keep projects presentation editorial and minimal: no image placeholders, no decorative numbering, and no top accent rule unless explicitly requested.
+- On small screens, keep project title left and place GitHub icon+link in the same row aligned right.
 - Keep homepage breakpoint behavior consistent:
 - headings and hero text align center below `xl`, left at `xl+`.
 - hero two-column split starts at `xl`.
@@ -134,6 +143,10 @@
 - Scroll-to-top button is fixed bottom-center; pages with footer text may need extra bottom padding to avoid overlap.
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
 - Homepage "My Blogs" uses `HomeLatestBlogs` and shows "Read more" only when `pageInfo.hasNextPage`.
+- Homepage "Projects" uses `HomeFeaturedProjects` with local typed data from `src/lib/featuredProjects.ts`.
+- Projects stack presentation is inline metadata separated by dots (`•`) instead of pill badges.
+- Projects GitHub actions use `lucide-react` `Github` icon and shared blue hover/focus color with text.
+- The portfolio project can be marked with `isCurrent` in data to show the `Current` badge.
 - Blog detail uses `publication(host).post(slug)` to resolve post ID, then `post(id)` for full content.
 - `BlogPostDetailApolloLogger` gates Apollo queries behind hydration to avoid SSR/client mismatches.
 - Blog content renders Markdown via `react-markdown` + `remark-gfm` + `rehype-raw`.
@@ -160,9 +173,14 @@
 - Shadows remain visible and performant.
 - For style changes, verify both desktop and mobile layout behavior.
 - For homepage layout changes, verify:
-- `Hi, I&apos;m`, `Languages and Tools`, and `My Blogs` share the same horizontal container edges on large screens.
+- `Hi, I&apos;m`, `Languages and Tools`, `My Blogs`, and `Projects` share the same horizontal container edges on large screens.
 - The same titles are centered on mobile/tablet and switch to left-aligned from `xl`.
 - No horizontal scrolling appears across breakpoints unless intentionally introduced.
+- For homepage projects changes, verify:
+- Project titles are left-aligned on mobile and desktop.
+- GitHub icon and label are aligned together and both change to blue on hover/focus.
+- Inline stack metadata wraps cleanly on small screens without overlap.
+- `Current` badge appears only for items with `isCurrent: true`.
 - For likes changes, verify:
 - First render shows stable count and correct singular/plural label (`Like` vs `Likes`).
 - Slow network still feels responsive (optimistic update), and UI rolls back on failed requests.

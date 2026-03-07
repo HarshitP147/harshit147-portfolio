@@ -3,6 +3,7 @@ import ModelCanvas from "@/components/ModelCanvas";
 import TechMarquee from "@/components/TechMarquee";
 import ThemeToggle from "@/components/ThemeToggle";
 import HomeLatestBlogs from "@/components/HomeLatestBlogs";
+import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
 import { Separator } from "@/components/ui/separator";
 import { sectionShellClassName, sectionTitleClassName } from "@/components/sectionStyles";
 import { cookies } from "next/headers";
@@ -18,7 +19,7 @@ export default async function Home() {
       <div className={sectionShellClassName()}>
         <main className="flex flex-col-reverse items-center justify-center gap-10 pb-10 pt-20 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
           <div className="flex w-full my-auto flex-col items-center gap-6 pt-6 text-center xl:items-start xl:pt-4 xl:text-left">
-            <div className="xl:-translate-y-62">
+            <div className="xl:-translate-y-24">
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
@@ -56,6 +57,7 @@ export default async function Home() {
             </p>
           )}
         </section>
+        <HomeFeaturedProjects />
         <div className="pb-12">
           <Separator className="mt-8 bg-border/70" />
           <div className="mt-6 flex w-full items-center justify-between gap-4">
