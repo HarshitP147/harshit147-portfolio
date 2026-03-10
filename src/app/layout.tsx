@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Outfit } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ApolloWrapper from "@/app/ApolloWrapper";
 import ScrollToTop from "@/components/ScrollToTop";
+import BottomBar from "@/components/BottomBar";
 import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
@@ -17,6 +18,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -33,7 +39,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const cookieTheme = cookieStore.get("theme")?.value;
   const initialTheme =
-    cookieTheme === "light" || cookieTheme === "dark" ? cookieTheme : "";
+    cookieTheme === "light" || cookieTheme === "dark" ? cookieTheme : undefined;
 
   return (
     <html
@@ -42,7 +48,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
         <Script id="theme-init" strategy="beforeInteractive">{`
           (function() {
@@ -63,7 +69,10 @@ export default async function RootLayout({
             } catch (e) {}
           })();
         `}</Script>
-        <ApolloWrapper>{children}</ApolloWrapper>
+        <ApolloWrapper>
+          {children}    
+        </ApolloWrapper>
+        <BottomBar initialTheme={initialTheme} />
         <ScrollToTop />
         <Analytics />
         <SpeedInsights />

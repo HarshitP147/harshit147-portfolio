@@ -1,20 +1,12 @@
 import NameGradient from "@/components/NameGradient";
 import ModelCanvas from "@/components/ModelCanvas";
 import TechMarquee from "@/components/TechMarquee";
-import ThemeToggle from "@/components/ThemeToggle";
 import HomeLatestBlogs from "@/components/HomeLatestBlogs";
 import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
 import HomePersonalLinks from "@/components/HomePersonalLinks";
-import { Separator } from "@/components/ui/separator";
 import { sectionShellClassName, sectionTitleClassName } from "@/components/sectionStyles";
-import { cookies } from "next/headers";
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const cookieTheme = cookieStore.get("theme")?.value;
-  const initialTheme =
-    cookieTheme === "light" || cookieTheme === "dark" ? cookieTheme : undefined;
-
   return (
     <div className="min-h-screen bg-background font-sans text-primary-foreground">
       <div className={sectionShellClassName()}>
@@ -24,8 +16,8 @@ export default async function Home() {
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
-              <h1 className="max-w-[12ch] text-5xl font-semibold uppercase tracking-[0.08em] sm:max-w-none sm:text-6xl xl:text-7xl">
-                <NameGradient />
+              <h1 className="max-w-[12em] text-3xl font-medium tracking-[0.03em] sm:max-w-none sm:text-7xl xl:text-8xl">
+                <NameGradient className="font-inter" />
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
@@ -60,13 +52,6 @@ export default async function Home() {
         </section>
         <HomeFeaturedProjects />
         <HomePersonalLinks />
-        <div className="pb-12">
-          <Separator className="mt-8 bg-border/70" />
-          <div className="mt-6 flex w-full items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">Made by Harshit</p>
-            <ThemeToggle initialTheme={initialTheme} />
-          </div>
-        </div>
       </div>
     </div>
   );

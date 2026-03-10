@@ -165,7 +165,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    transition: background-color 500ms ease, color 500ms ease;
   }
   html {
     scroll-behavior: smooth;
@@ -183,7 +182,7 @@
   body,
   .icon-card,
   .icon-card img {
-    transition: background-color 500ms ease, color 500ms ease, filter 500ms ease;
+    transition: none;
   }
 }
 
@@ -203,8 +202,7 @@
   pointer-events: none;
   color: transparent;
   background-clip: text;
-  -webkit-background-clip: text;
-  transition: opacity 5000ms cubic-bezier(0.47, 0, 0.75, 0.72);
+  
 }
 
 .gradient-blue {
@@ -213,6 +211,15 @@
 
 .gradient-red {
   background-image: linear-gradient(to bottom left, #F52A87, #FD5F00);
+}
+
+.font-apple {
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
+}
+
+.font-inter {
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
 @keyframes marquee-left {

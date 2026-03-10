@@ -71,8 +71,8 @@ export default function ThemeToggle({
         checked={isDark}
         onCheckedChange={(next) => setTheme(next ? "dark" : "light")}
         aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-        className="h-8 w-14 border-border/70 bg-muted/60"
-        thumbClassName="left-1.5 flex h-6 w-6 items-center justify-center bg-foreground text-background shadow-sm p-0"
+        className="h-8 w-14 border-border/70 bg-muted/60 dark:border-black/10 dark:bg-white/90"
+        thumbClassName="left-1.5 flex h-6 w-6 items-center justify-center bg-foreground text-background shadow-sm p-0 dark:bg-black dark:text-white"
         thumbCheckedClassName="translate-x-5"
         thumbChildren={
           isDark ? (

@@ -8,38 +8,30 @@ type NameGradientProps = {
 };
 
 export default function NameGradient({
-  text = "HARSHIT PANDIT",
+  text = "Harshit Pandit",
   className = "",
 }: NameGradientProps) {
-  const [isBlueTheme, setIsBlueTheme] = useState(true);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsBlueTheme((prev) => !prev);
-    }, 12000);
+    const root = document.documentElement;
 
-    return () => clearInterval(interval);
+    const updateTheme = () => {
+      const isDark = root.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
+    };
+
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
   }, []);
-
-  const textClass = " whitespace-normal xl:whitespace-nowrap";
 
   return (
     <span className={`relative block ${className}`.trim()}>
-      <span className={`${textClass} opacity-0`}>{text}</span>
-      <span
-        aria-hidden="true"
-        className={`gradient-layer gradient-blue ${textClass} ${
-          isBlueTheme ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {text}
-      </span>
-      <span
-        aria-hidden="true"
-        className={`gradient-layer gradient-red ${textClass} ${
-          isBlueTheme ? "opacity-0" : "opacity-100"
-        }`}
-      >
+      <span className="whitespace-normal xl:whitespace-nowrap">{text}</span>
+      <span className={`gradient-layer  ${theme === "light" ? "gradient-blue" : "gradient-red"} whitespace-normal xl:whitespace-nowrap absolute top-0 left-0`}>
         {text}
       </span>
     </span>

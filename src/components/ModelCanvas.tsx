@@ -151,7 +151,7 @@ function Scene({
 }
 
 export default function ModelCanvas() {
-  const [sceneVisuals, setSceneVisuals] = useState(getSceneVisuals);
+  const [sceneVisuals, setSceneVisuals] = useState(LIGHT_SCENE_VISUALS);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -194,7 +194,7 @@ export default function ModelCanvas() {
         className="absolute inset-0"
         style={{
           background:
-            `linear-gradient(to bottom, ${sceneVisuals.skyColor} 0%, ${sceneVisuals.skyColor} 49%, ${SCENE_FLOOR_COLOR} 49%, ${SCENE_FLOOR_COLOR} 100%)`,
+            "linear-gradient(to bottom, var(--scene-sky) 0%, var(--scene-sky) 49%, var(--scene-floor) 49%, var(--scene-floor) 100%)",
         }}
       />
       <Canvas

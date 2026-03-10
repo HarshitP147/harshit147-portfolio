@@ -287,24 +287,10 @@ export default function BlogPostDetailApolloLogger({
     <div className="flex w-full flex-col items-start gap-6 text-foreground">
       <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
         <GoBackButton onClick={() => router.back()} />
-        {post.url ? (
-          <a
-            href={post.url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
-          >
-            View on Hashnode
-            <ArrowUpRight className="size-3.5" />
-          </a>
-        ) : null}
       </div>
       <article className="mx-auto flex w-full max-w-3xl flex-col gap-10">
         <header className="space-y-6">
           <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Blog Post
-            </p>
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
               {post.title}
             </h1>
