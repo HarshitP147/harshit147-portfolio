@@ -18,7 +18,7 @@ export default function SocialLinksStack({ links }: SocialLinksStackProps) {
             <a
               href={link.href}
               aria-label={link.ariaLabel}
-              className="group flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-background/50 px-4 py-3 text-muted-foreground transition-colors duration-200 hover:text-[rgb(147,197,253)] focus-visible:text-[rgb(147,197,253)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(147,197,253)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="group flex w-full items-center gap-3 rounded-2xl border  bg-background/50 px-4 py-3 text-muted-foreground transition-[border-color,color,box-shadow] duration-200 hover:border-border/70 hover:text-[rgb(147,197,253)] hover:shadow-[0_0_0_1px_hsl(var(--border)/0.7)] focus-visible:border-border/70 focus-visible:text-[rgb(147,197,253)] focus-visible:shadow-[0_0_0_1px_hsl(var(--border)/0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(147,197,253)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               target={external ? "_blank" : undefined}
               rel={external ? "noopener noreferrer" : undefined}
             >

@@ -124,7 +124,7 @@
 
 ## Recent Additions and Pitfalls
 - Added homepage "My Socials" section (`src/components/HomePersonalLinks.tsx`) with a left portrait and right-side link stack on `md+`, icon-only row under the image on small screens.
-- New responsive link list extracted to `src/components/SocialLinksList.tsx` to render mobile vs desktop layouts cleanly via Tailwind breakpoints.
+- Social links are split into `src/components/SocialLinksStack.tsx` (desktop) and `src/components/SocialLinksDock.tsx` (mobile), with shared icon logic in `src/components/SocialLinksShared.tsx`.
 - Social link data is centralized in `src/lib/personalLinks.ts` (LinkedIn, GitHub, X, Instagram, Email).
 - Public assets reorganized into `public/marquee/top`, `public/marquee/bottom`, and `public/misc`; update paths in `TechMarquee` and `ModelCanvas` accordingly.
 - Custom icon components live in `src/components/icons/*` and import SVG/PNG assets from `public/misc` (LinkedIn, GitHub, X, Instagram).
@@ -132,6 +132,8 @@
 - Pitfall: importing large SVGs (e.g. `Instagram_Glyph_Gradient.svg`, ~10MB) via SVGR triggers Babel "deoptimised" warnings. Use `next/image` with the SVG path (no SVGR import) or a smaller PNG asset.
 - Pitfall: several installed SVGs lack `viewBox`, causing zoom/crop. Work around by passing `viewBox`/`preserveAspectRatio` or switching to `next/image`.
 - Pitfall: CSS mask icons failed to render reliably; replaced with React icon components importing assets directly.
+- Pitfall: avoid using `transform` scaling (e.g., `scale-*`) to size layout columns. Transforms do not affect layout and can collapse or misalign sibling columns; size via widths/heights or grid columns instead.
+- Pitfall: for hover-only borders, use `border-transparent` with explicit `transition-[border-color]` and `hover:border-*`. If theme alpha makes the border hard to see, add a subtle hover `box-shadow` outline.
 - Hashnode blog data uses Apollo Client with Next.js App Router streaming:
 - `ApolloNextAppProvider` in `src/app/ApolloWrapper.tsx` is required; plain `ApolloProvider` breaks streaming hooks.
 - Apollo hooks should be imported from `@apollo/client/react`.

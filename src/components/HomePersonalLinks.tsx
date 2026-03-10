@@ -9,21 +9,21 @@ export default function HomePersonalLinks() {
     <section className="py-12 text-foreground">
       <div className="flex flex-col gap-8">
         <div className="flex flex-col items-center gap-3 text-center xl:items-start xl:text-left">
-          <h2 className={sectionTitleClassName("text-xl")}>My Socials</h2>
+          <h2 className={sectionTitleClassName("text-xl")}>Socials</h2>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-            Socials where I am most active. Feel free to reach out!
+            My online presence where you can find me. Feel free to connect!
           </p>
 
         </div>
 
         <div className="flex flex-col align-middle items-center md:flex-row gap-16">
-          <div className="w-full md:scale-50 ">
+          <div className="w-full  ">
             <Image
               src="/misc/me_real_clear.png"
               alt="Harshit sitting behind a laptop and smiling"
               width={300}
-              height={300}
-              className="rounded-3xl mx-auto w-full  bg-muted/20"
+              height={100}
+              className="rounded-3xl mx-auto md:w-full h-3/5 object-cover  bg-muted/20"
               priority={false}
             />
 
