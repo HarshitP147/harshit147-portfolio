@@ -4,6 +4,7 @@ import TechMarquee from "@/components/TechMarquee";
 import ThemeToggle from "@/components/ThemeToggle";
 import HomeLatestBlogs from "@/components/HomeLatestBlogs";
 import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
+import HomePersonalLinks from "@/components/HomePersonalLinks";
 import { Separator } from "@/components/ui/separator";
 import { sectionShellClassName, sectionTitleClassName } from "@/components/sectionStyles";
 import { cookies } from "next/headers";
@@ -58,6 +59,7 @@ export default async function Home() {
           )}
         </section>
         <HomeFeaturedProjects />
+        <HomePersonalLinks />
         <div className="pb-12">
           <Separator className="mt-8 bg-border/70" />
           <div className="mt-6 flex w-full items-center justify-between gap-4">

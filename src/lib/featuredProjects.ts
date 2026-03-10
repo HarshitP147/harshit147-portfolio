@@ -17,7 +17,7 @@ export const featuredProjects: FeaturedProject[] = [
     title: "Portfolio Website",
     domain: "Fullstack Web",
     description:
-      "The website you're currently viewing, built with Next.js and Shadcn, designed and engineerd with Codex.",
+      "The website you're currently viewing, designed and engineered with Codex.",
     stack: [
       "Next.js",
       "Shadcn UI",
@@ -47,7 +47,7 @@ export const featuredProjects: FeaturedProject[] = [
     ],
   },
   {
-    title: "OpenGL Solarpunk Renderer",
+    title: "Solarpunk Scene explorer",
     domain: "Computer Graphics",
     description:
       "A C++ OpenGL renderer that builds a futuristic Emerald Isle scene with a custom real-time graphics pipeline.",

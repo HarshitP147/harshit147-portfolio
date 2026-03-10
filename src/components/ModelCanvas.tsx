@@ -12,7 +12,7 @@ import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 function Model() {
-  const { scene } = useGLTF("/scene.glb");
+  const { scene } = useGLTF("/misc/scene.glb");
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -26,7 +26,7 @@ function Model() {
   return <primitive object={scene} />;
 }
 
-useGLTF.preload("/scene.glb");
+useGLTF.preload("/misc/scene.glb");
 
 const FAST_SPEED = 350.0;
 const SLOW_SPEED = 7.0;

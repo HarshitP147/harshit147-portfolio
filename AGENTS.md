@@ -123,6 +123,15 @@
 - Delete key `likes:post:<postId>` (or set to `0`) in the Redis console.
 
 ## Recent Additions and Pitfalls
+- Added homepage "My Socials" section (`src/components/HomePersonalLinks.tsx`) with a left portrait and right-side link stack on `md+`, icon-only row under the image on small screens.
+- New responsive link list extracted to `src/components/SocialLinksList.tsx` to render mobile vs desktop layouts cleanly via Tailwind breakpoints.
+- Social link data is centralized in `src/lib/personalLinks.ts` (LinkedIn, GitHub, X, Instagram, Email).
+- Public assets reorganized into `public/marquee/top`, `public/marquee/bottom`, and `public/misc`; update paths in `TechMarquee` and `ModelCanvas` accordingly.
+- Custom icon components live in `src/components/icons/*` and import SVG/PNG assets from `public/misc` (LinkedIn, GitHub, X, Instagram).
+- Pitfall: using `webpack()` for SVGR breaks Turbopack builds. Use `turbopack.rules` in `next.config.ts` instead.
+- Pitfall: importing large SVGs (e.g. `Instagram_Glyph_Gradient.svg`, ~10MB) via SVGR triggers Babel "deoptimised" warnings. Use `next/image` with the SVG path (no SVGR import) or a smaller PNG asset.
+- Pitfall: several installed SVGs lack `viewBox`, causing zoom/crop. Work around by passing `viewBox`/`preserveAspectRatio` or switching to `next/image`.
+- Pitfall: CSS mask icons failed to render reliably; replaced with React icon components importing assets directly.
 - Hashnode blog data uses Apollo Client with Next.js App Router streaming:
 - `ApolloNextAppProvider` in `src/app/ApolloWrapper.tsx` is required; plain `ApolloProvider` breaks streaming hooks.
 - Apollo hooks should be imported from `@apollo/client/react`.
