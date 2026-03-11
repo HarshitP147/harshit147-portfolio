@@ -53,6 +53,8 @@ export function BlogPostCard({
               src={coverImageUrl}
               alt={title}
               fill
+              loading="lazy"
+              decoding="async"
               sizes={
                 size === "compact"
                   ? "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"

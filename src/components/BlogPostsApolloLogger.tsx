@@ -42,11 +42,12 @@ const PUBLICATION_POSTS_QUERY = gql`
 `;
 
 export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLoggerProps) {
+  const pageSize = 3;
   const { data, error, refetch } = useQuery<
     UserPostsQuery,
     UserPostsQueryVariables
   >(PUBLICATION_POSTS_QUERY, {
-    variables: { username, page: 1, pageSize: 20 },
+    variables: { username, page: 1, pageSize },
     fetchPolicy: "cache-only",
   });
   const [isFetching, setIsFetching] = useState(false);
@@ -67,7 +68,7 @@ export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLogge
     setHasAttemptedFetch(true);
     setIsFetching(true);
 
-    refetch({ username, page: 1, pageSize: 20 })
+    refetch({ username, page: 1, pageSize })
       .catch(() => undefined)
       .finally(() => setIsFetching(false));
   }, [error, hasAttemptedFetch, hasCachedPosts, username, refetch]);
@@ -75,7 +76,7 @@ export default function BlogPostsApolloLogger({ username }: BlogPostsApolloLogge
   if (isFetching && !hasCachedPosts) {
     return (
       <div className="grid gap-y-6 gap-x-8 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {Array.from({ length: pageSize }).map((_, index) => (
           <BlogPostCardSkeleton key={`skeleton-${index}`} />
         ))}
       </div>

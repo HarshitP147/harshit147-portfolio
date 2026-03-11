@@ -23,7 +23,11 @@ export default function HomePersonalLinks() {
               alt="Harshit sitting behind a laptop and smiling"
               width={300}
               height={100}
-              className="rounded-3xl mx-auto md:w-full h-3/5 object-cover  bg-muted/20"
+              sizes="(max-width: 768px) 70vw, (max-width: 1024px) 50vw, 360px"
+              className="mx-auto h-3/5 rounded-3xl bg-muted/20 object-cover md:w-full"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               priority={false}
             />
 

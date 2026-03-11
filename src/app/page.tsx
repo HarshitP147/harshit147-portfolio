@@ -1,5 +1,5 @@
 import NameGradient from "@/components/NameGradient";
-import ModelCanvas from "@/components/ModelCanvas";
+import ModelCanvasLazy from "@/components/ModelCanvasLazy";
 import TechMarquee from "@/components/TechMarquee";
 import HomeLatestBlogs from "@/components/HomeLatestBlogs";
 import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
@@ -16,8 +16,8 @@ export default async function Home() {
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
-              <h1 className="max-w-[12em] text-3xl font-medium tracking-[0.03em] sm:max-w-none sm:text-7xl xl:text-8xl">
-                <NameGradient className="font-inter" />
+              <h1 className="max-w-[12em] text-3xl font-light tracking-[0.03em] sm:max-w-none sm:text-7xl xl:text-8xl">
+                <NameGradient className="font-geist" />
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
@@ -37,7 +37,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
-            <ModelCanvas />
+            <ModelCanvasLazy />
           </div>
         </main>
         <TechMarquee />

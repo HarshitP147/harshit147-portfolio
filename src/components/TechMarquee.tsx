@@ -67,6 +67,9 @@ function MarqueeItem({ item }: { item: TechItem }) {
         src={item.src}
         alt=""
         className={`h-11 w-11 object-contain sm:h-14 sm:w-14 lg:h-16 lg:w-16 ${item.invertAlways ? "always-invert" : item.invert ? "auto-invert" : ""}`.trim()}
+        loading="lazy"
+        decoding="async"
+        fetchPriority="low"
         draggable={false}
       />
       <span className="sr-only">{item.label}</span>

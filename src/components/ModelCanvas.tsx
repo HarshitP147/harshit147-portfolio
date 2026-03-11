@@ -5,6 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import {
   Center,
   ContactShadows,
+  Html,
   OrbitControls,
   useGLTF,
 } from "@react-three/drei";
@@ -26,7 +27,16 @@ function Model() {
   return <primitive object={scene} />;
 }
 
-useGLTF.preload("/misc/scene.glb");
+function ModelLoader() {
+  return (
+    <Html center>
+      <div className="flex items-center gap-3 rounded-full bg-background/80 px-3 py-2 text-xs font-medium uppercase tracking-[0.3em] text-foreground/70 shadow-sm">
+        <span className="h-3 w-3 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground/70" />
+        Loading 3D
+      </div>
+    </Html>
+  );
+}
 
 const FAST_SPEED = 350.0;
 const SLOW_SPEED = 7.0;
@@ -104,7 +114,7 @@ function Scene({
         castShadow
         shadow-radius={4}
       />
-      <Suspense fallback={null}>
+      <Suspense fallback={<ModelLoader />}>
         <group>
           <Center
             onCentered={({ boundingBox }) => {
@@ -200,6 +210,7 @@ export default function ModelCanvas() {
       <Canvas
         className="relative z-10"
         camera={{ position: [0, 0, 3], fov: 45 }}
+        dpr={[1, 1.5]}
         shadows
         gl={{ alpha: true }}
       >
