@@ -77,7 +77,7 @@ export function BlogPostCard({
         >
           <h3
             className={cn(
-              "font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover/card:text-foreground line-clamp-2 min-h-[2.75rem]",
+              "font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover/card:text-foreground line-clamp-2 min-h-[44px]",
               size === "compact" ? "text-sm" : "text-base",
             )}
           >

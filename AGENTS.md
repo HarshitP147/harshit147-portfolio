@@ -108,6 +108,7 @@
 - Keep `ModelCanvas` interactions constrained for UX consistency.
 - Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` should mirror placement and styling for its "Go back" link (top-left, muted, underline offset).
 - Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
+- Pixel units are allowed for sizing; keep values aligned with existing layout scales and tokens.
 - Keep imports alias-first (`@/...`) instead of long relative paths.
 - Maintain TypeScript strict compatibility.
 
@@ -126,6 +127,13 @@
 - Added homepage "My Socials" section (`src/components/HomePersonalLinks.tsx`) with a left portrait and right-side link stack on `md+`, icon-only row under the image on small screens.
 - Social links are split into `src/components/SocialLinksStack.tsx` (desktop) and `src/components/SocialLinksDock.tsx` (mobile), with shared icon logic in `src/components/SocialLinksShared.tsx`.
 - Social link data is centralized in `src/lib/personalLinks.ts` (LinkedIn, GitHub, X, Instagram, Email).
+- Performance: `ModelCanvasLazy` defers Three.js until `window.load` and the canvas is near viewport, showing a poster + spinner first; `ModelCanvas` uses a `Suspense` loader inside the canvas.
+- Performance: `useGLTF.preload` is disabled for the hero model; `Canvas` uses a capped `dpr` range (`[1, 1.5]`) to reduce GPU load.
+- Performance: prefer lazy-loading below-the-fold media with explicit `loading="lazy"`, `decoding="async"`, and correct `sizes` so images render at their intended width.
+- Blog list: `/blog` page size is set to `3` for now; pagination can be layered later.
+- Social dock: mobile icon buttons do not use circular borders (dock is borderless).
+- Pitfall: incorrect `sizes` values can force low-res images; keep the fallback width aligned with the actual container width.
+- Pitfall: `IntersectionObserver` `rootMargin` only accepts `px` or `%` (not `rem`).
 - Public assets reorganized into `public/marquee/top`, `public/marquee/bottom`, and `public/misc`; update paths in `TechMarquee` and `ModelCanvas` accordingly.
 - Custom icon components live in `src/components/icons/*` and import SVG/PNG assets from `public/misc` (LinkedIn, GitHub, X, Instagram).
 - Pitfall: using `webpack()` for SVGR breaks Turbopack builds. Use `turbopack.rules` in `next.config.ts` instead.

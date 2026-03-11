@@ -115,7 +115,7 @@ export default function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
             publishedAt={post.publishedAt ?? null}
             readTimeInMinutes={post.readTimeInMinutes ?? null}
             size="compact"
-            className={posts.length < 3 ? "w-full max-w-[360px]" : undefined}
+            className={posts.length < 3 ? "w-full max-w-[360px] flex-none" : undefined}
           />
         ))}
       </div>
