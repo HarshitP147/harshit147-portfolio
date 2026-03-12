@@ -1,55 +1,12 @@
-"use client";
-
-import { gql } from "@apollo/client";
-import { useApolloClient, useQuery } from "@apollo/client/react";
-import { ArrowUpRight, Clock3 } from "lucide-react";
+import { Clock3 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
 import LikeButton from "@/components/LikeButton";
-import type {
-  PostIdBySlugQuery,
-  PostIdBySlugQueryVariables,
-  PostByIdQuery,
-  PostByIdQueryVariables,
-} from "@/lib/graphql/generated";
-
-const POST_ID_BY_SLUG_QUERY = gql`
-  query PostIdBySlug($host: String!, $slug: String!) {
-    publication(host: $host) {
-      id
-      post(slug: $slug) {
-        id
-        slug
-      }
-    }
-  }
-`;
-
-const POST_BY_ID_QUERY = gql`
-  query PostById($id: ID!) {
-    post(id: $id) {
-      id
-      title
-      brief
-      slug
-      url
-      publishedAt
-      readTimeInMinutes
-      coverImage {
-        url
-      }
-      content {
-        markdown
-      }
-    }
-  }
-`;
+import { fetchHashnodePostBySlug } from "@/lib/hashnode";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -63,33 +20,6 @@ type BlogPostDetailApolloLoggerProps = {
   publicationHost: string;
   slug: string;
 };
-
-type PostCacheEntity = {
-  __typename?: string;
-  id?: unknown;
-  slug?: unknown;
-};
-
-function resolvePostIdBySlug(cache: unknown, slug: string): string | null {
-  if (!cache || typeof cache !== "object") {
-    return null;
-  }
-
-  for (const entity of Object.values(cache as Record<string, unknown>)) {
-    if (!entity || typeof entity !== "object") {
-      continue;
-    }
-
-    const post = entity as PostCacheEntity;
-    if (post.__typename !== "Post" || post.slug !== slug) {
-      continue;
-    }
-
-    return typeof post.id === "string" ? post.id : null;
-  }
-
-  return null;
-}
 
 function getEmbedMarkup(rawUrl: string): string {
   try {
@@ -158,117 +88,35 @@ const markdownComponents: Components = {
   },
 };
 
-function GoBackButton({ onClick }: { onClick: () => void }) {
+function GoBackLink() {
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      className="self-start text-sm text-muted-foreground"
-      style={{ textUnderlineOffset: "4px" }}
-      whileHover={{ color: "rgb(147, 197, 253)", textDecoration: "underline" }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+    <Link
+      href="/blog"
+      className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
     >
       Go back
-    </motion.button>
+    </Link>
   );
 }
 
-function PostDetailSkeleton() {
-  return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <div className="h-6 w-40 animate-pulse rounded-full bg-foreground/10" />
-      <div className="h-10 w-3/4 animate-pulse rounded-full bg-foreground/10" />
-      <div className="h-5 w-full animate-pulse rounded-full bg-foreground/10" />
-      <div className="aspect-[16/9] w-full animate-pulse rounded-3xl bg-foreground/10" />
-      <div className="space-y-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={`post-skeleton-${index}`}
-            className="h-4 w-full animate-pulse rounded-full bg-foreground/10"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function BlogPostDetailApolloLogger({
+export default async function BlogPostDetailApolloLogger({
   publicationHost,
   slug,
 }: BlogPostDetailApolloLoggerProps) {
-  const router = useRouter();
-  const client = useApolloClient();
-  const [hasHydrated, setHasHydrated] = useState(false);
+  let post = null;
 
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-  const cachedPostId = hasHydrated
-    ? resolvePostIdBySlug(client.cache.extract(), slug)
-    : null;
-
-  const {
-    data: postIdBySlugData,
-    loading: postIdBySlugLoading,
-    error: postIdBySlugError,
-  } = useQuery<PostIdBySlugQuery, PostIdBySlugQueryVariables>(POST_ID_BY_SLUG_QUERY, {
-    variables: { host: publicationHost, slug },
-    fetchPolicy: "cache-first",
-    nextFetchPolicy: "cache-first",
-    skip: !hasHydrated || Boolean(cachedPostId),
-  });
-
-  const postIdFromList = postIdBySlugData?.publication?.post?.id ?? null;
-
-  const postId = cachedPostId ?? postIdFromList;
-
-  const { data, loading, error } = useQuery<
-    PostByIdQuery,
-    PostByIdQueryVariables
-  >(POST_BY_ID_QUERY, {
-    variables: { id: postId ?? "" },
-    skip: !hasHydrated || !postId,
-    fetchPolicy: "cache-first",
-    nextFetchPolicy: "cache-first",
-  });
-
-  if (!hasHydrated) {
-    return <PostDetailSkeleton />;
+  try {
+    post = await fetchHashnodePostBySlug({ host: publicationHost, slug });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to load the post.";
+    return <p className="text-sm text-muted-foreground">{message}</p>;
   }
-
-  if (postIdBySlugLoading && !postId) {
-    return <PostDetailSkeleton />;
-  }
-
-  if (postIdBySlugError) {
-    return <p className="text-sm text-muted-foreground">{postIdBySlugError.message}</p>;
-  }
-
-  if (!postId) {
-    return (
-      <div className="flex w-full flex-col items-start gap-6 text-muted-foreground">
-        <GoBackButton onClick={() => router.back()} />
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-          <p className="text-sm">We couldn&apos;t find this post.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return <PostDetailSkeleton />;
-  }
-
-  if (error) {
-    return <p className="text-sm text-muted-foreground">{error.message}</p>;
-  }
-
-  const post = data?.post ?? null;
 
   if (!post || post.slug !== slug) {
     return (
       <div className="flex w-full flex-col items-start gap-6 text-muted-foreground">
-        <GoBackButton onClick={() => router.back()} />
+        <GoBackLink />
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
           <p className="text-sm">We couldn&apos;t find this post.</p>
         </div>
@@ -286,7 +134,7 @@ export default function BlogPostDetailApolloLogger({
   return (
     <div className="flex w-full flex-col items-start gap-6 text-foreground">
       <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
-        <GoBackButton onClick={() => router.back()} />
+        <GoBackLink />
       </div>
       <article className="mx-auto flex w-full max-w-3xl flex-col gap-10">
         <header className="space-y-6">

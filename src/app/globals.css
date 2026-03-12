@@ -240,6 +240,15 @@
   }
 }
 
+.heart-pulse {
+  transform: scale(1.18);
+}
+
+.heart-pulse {
+  transform-origin: center;
+  will-change: transform;
+}
+
 @keyframes outline-dash {
   to {
     stroke-dashoffset: -24;

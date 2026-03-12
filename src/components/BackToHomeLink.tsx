@@ -1,23 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 export default function BackToHomeLink() {
   return (
-    <motion.div className="inline-flex">
+    <div className="inline-flex">
       <Link
         href="/"
-        className="text-sm text-muted-foreground"
-        style={{ textUnderlineOffset: "4px" }}
+        className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
       >
-        <motion.span
-          whileHover={{ color: "rgb(147, 197, 253)", textDecoration: "underline" }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          Back to Home
-        </motion.span>
+        Back to Home
       </Link>
-    </motion.div>
+    </div>
   );
 }

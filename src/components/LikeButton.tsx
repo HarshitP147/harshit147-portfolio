@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, type Variants } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -17,31 +16,14 @@ type LikeResponse = {
 
 const REQUEST_TIMEOUT_MS = 8000;
 
-const heartVariants: Variants = {
-  idle: { scale: 1, rotate: 0, y: 0 },
-  liked: {
-    scale: [1, 1.35, 1],
-    rotate: [0, -12, 0],
-    y: [0, -2, 0],
-    transition: { duration: 0.35, ease: "easeOut" },
-  },
-  unliked: {
-    scale: [1, 0.82, 1],
-    rotate: [0, 10, 0],
-    y: [0, 1, 0],
-    transition: { duration: 0.28, ease: "easeOut" },
-  },
-};
-
 export default function LikeButton({ postId, className }: LikeButtonProps) {
   const storageKey = useMemo(() => `liked:post:${postId}`, [postId]);
   const hasUserInteracted = useRef(false);
   const [likes, setLikes] = useState<number | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [iconAnimation, setIconAnimation] = useState<"idle" | "liked" | "unliked">(
-    "idle",
-  );
+  const [pulse, setPulse] = useState(false);
+  const pulseTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -87,7 +69,17 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
 
     setIsLiked(nextIsLiked);
     setLikes(nextLikes);
-    setIconAnimation(nextIsLiked ? "liked" : "unliked");
+    setPulse(false);
+    if (pulseTimeoutRef.current) {
+      window.clearTimeout(pulseTimeoutRef.current);
+    }
+    // trigger a short scale pulse to acknowledge the tap
+    requestAnimationFrame(() => {
+      setPulse(true);
+      pulseTimeoutRef.current = window.setTimeout(() => {
+        setPulse(false);
+      }, 160);
+    });
     if (nextIsLiked) {
       window.localStorage.setItem(storageKey, "1");
     } else {
@@ -111,7 +103,6 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
     } catch {
       setIsLiked(previousIsLiked);
       setLikes(previousLikes);
-      setIconAnimation(previousIsLiked ? "liked" : "unliked");
       if (previousIsLiked) {
         window.localStorage.setItem(storageKey, "1");
       } else {
@@ -135,33 +126,27 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
           isLiked ? "text-primary" : "cursor-pointer",
         )}
       >
-        <motion.span
-          className="inline-flex"
-          variants={heartVariants}
-          initial={false}
-          animate={iconAnimation}
-          onAnimationComplete={() => setIconAnimation("idle")}
-        >
-          <motion.svg
+        <span className="inline-flex transition-transform duration-200">
+          <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             aria-hidden="true"
-            className="size-4"
-            initial={false}
-            animate={{
-              fill: isLiked ? "#ec4899" : "transparent",
-              stroke: isLiked ? "#ec4899" : "currentColor",
-            }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            className={cn(
+              "size-4 transition-transform duration-200",
+              pulse && "heart-pulse",
+              !isLiked && "text-muted-foreground",
+            )}
+            fill={isLiked ? "#ec4899" : "none"}
+            stroke={isLiked ? "#ec4899" : "currentColor"}
           >
-            <motion.path
+            <path
               d="M12 21s-6.716-4.56-9.193-8.182C.73 9.782 1.077 5.64 4.25 3.74c2.27-1.36 5.12-.9 7.03 1.06L12 5.57l.72-.77c1.91-1.96 4.76-2.42 7.03-1.06 3.173 1.9 3.52 6.042 1.443 9.078C18.716 16.44 12 21 12 21Z"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </motion.svg>
-        </motion.span>
+          </svg>
+        </span>
         <span className="text-sm">{likes ?? 0}</span>
         <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
           {likes === 1 ? "Like" : "Likes"}

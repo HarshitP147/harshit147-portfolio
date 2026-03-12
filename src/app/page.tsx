@@ -1,12 +1,18 @@
 import NameGradient from "@/components/NameGradient";
 import ModelCanvasLazy from "@/components/ModelCanvasLazy";
 import TechMarquee from "@/components/TechMarquee";
-import HomeLatestBlogs from "@/components/HomeLatestBlogs";
+import { Suspense } from "react";
+import HomeLatestBlogs, { HomeLatestBlogsSkeleton } from "@/components/HomeLatestBlogs";
 import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
 import HomePersonalLinks from "@/components/HomePersonalLinks";
 import { sectionShellClassName, sectionTitleClassName } from "@/components/sectionStyles";
 
 export default async function Home() {
+  const username =
+    process.env.HASHNODE_USERNAME ??
+    process.env.NEXT_PUBLIC_HASHNODE_USERNAME ??
+    null;
+
   return (
     <div className="min-h-screen bg-background font-sans text-primary-foreground">
       <div className={sectionShellClassName()}>
@@ -42,11 +48,13 @@ export default async function Home() {
         </main>
         <TechMarquee />
         <section className="pb-10 text-foreground">
-          {process.env.NEXT_PUBLIC_HASHNODE_USERNAME ? (
-            <HomeLatestBlogs username={process.env.NEXT_PUBLIC_HASHNODE_USERNAME} />
+          {username ? (
+            <Suspense fallback={<HomeLatestBlogsSkeleton />}>
+              <HomeLatestBlogs username={username} />
+            </Suspense>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Set `NEXT_PUBLIC_HASHNODE_USERNAME` to load posts.
+              Set `HASHNODE_USERNAME` (or `NEXT_PUBLIC_HASHNODE_USERNAME`) to load posts.
             </p>
           )}
         </section>

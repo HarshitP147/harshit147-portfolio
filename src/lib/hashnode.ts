@@ -6,6 +6,15 @@ type HashnodePost = {
   slug: string;
   publishedAt: string;
   readTimeInMinutes: number;
+  coverImage?: {
+    url: string;
+  } | null;
+};
+
+type HashnodePostDetail = HashnodePost & {
+  content?: {
+    markdown?: string | null;
+  } | null;
 };
 
 type HashnodeUserResponse = {
@@ -16,23 +25,47 @@ type HashnodeUserResponse = {
         edges?: Array<{
           node?: HashnodePost;
         }>;
+        pageInfo?: {
+          hasNextPage?: boolean | null;
+        };
       };
     };
   };
   errors?: Array<{ message: string }>;
 };
 
+type HashnodePostDetailResponse = {
+  data?: {
+    publication?: {
+      post?: HashnodePostDetail | null;
+    } | null;
+  };
+  errors?: Array<{ message: string }>;
+};
+
 const HASHNODE_GQL_ENDPOINT = process.env.HASHNODE_GQL_ENDPOINT ?? "https://gql.hashnode.com";
-const HASHNODE_USERNAME = process.env.HASHNODE_USERNAME;
+const HASHNODE_USERNAME = process.env.HASHNODE_USERNAME ?? process.env.NEXT_PUBLIC_HASHNODE_USERNAME;
+const HASHNODE_PUBLICATION_HOST =
+  process.env.HASHNODE_PUBLICATION_HOST ??
+  process.env.NEXT_PUBLIC_HASHNODE_PUBLICATION_HOST;
 
 export type HashnodePostSummary = HashnodePost;
 
-export async function fetchHashnodePosts(first = 20): Promise<{
+export async function fetchHashnodePosts({
+  first = 20,
+  username,
+}: {
+  first?: number;
+  username?: string | null;
+} = {}): Promise<{
   authorName: string | null;
   posts: HashnodePostSummary[];
+  hasNextPage: boolean;
 }> {
-  if (!HASHNODE_USERNAME) {
-    return { authorName: null, posts: [] };
+  const resolvedUsername = username ?? HASHNODE_USERNAME ?? null;
+
+  if (!resolvedUsername) {
+    return { authorName: null, posts: [], hasNextPage: false };
   }
 
   const query = `
@@ -49,7 +82,13 @@ export async function fetchHashnodePosts(first = 20): Promise<{
               slug
               publishedAt
               readTimeInMinutes
+              coverImage {
+                url
+              }
             }
+          }
+          pageInfo {
+            hasNextPage
           }
         }
       }
@@ -63,7 +102,7 @@ export async function fetchHashnodePosts(first = 20): Promise<{
     },
     body: JSON.stringify({
       query,
-      variables: { username: HASHNODE_USERNAME, page: 1, pageSize: first },
+      variables: { username: resolvedUsername, page: 1, pageSize: first },
     }),
     next: { revalidate: 600 },
   });
@@ -83,6 +122,67 @@ export async function fetchHashnodePosts(first = 20): Promise<{
     payload.data?.user?.posts?.edges
       ?.map((edge) => edge.node)
       .filter((node): node is HashnodePost => Boolean(node)) ?? [];
+  const hasNextPage = Boolean(payload.data?.user?.posts?.pageInfo?.hasNextPage);
 
-  return { authorName, posts };
+  return { authorName, posts, hasNextPage };
+}
+
+export async function fetchHashnodePostBySlug({
+  slug,
+  host,
+}: {
+  slug: string;
+  host?: string | null;
+}): Promise<HashnodePostDetail | null> {
+  const resolvedHost = host ?? HASHNODE_PUBLICATION_HOST ?? null;
+
+  if (!resolvedHost) {
+    return null;
+  }
+
+  const query = `
+    query PostBySlug($host: String!, $slug: String!) {
+      publication(host: $host) {
+        post(slug: $slug) {
+          id
+          title
+          brief
+          slug
+          url
+          publishedAt
+          readTimeInMinutes
+          coverImage {
+            url
+          }
+          content {
+            markdown
+          }
+        }
+      }
+    }
+  `;
+
+  const response = await fetch(HASHNODE_GQL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query,
+      variables: { host: resolvedHost, slug },
+    }),
+    next: { revalidate: 600 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hashnode API error: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as HashnodePostDetailResponse;
+
+  if (payload.errors?.length) {
+    throw new Error(payload.errors.map((error) => error.message).join(", "));
+  }
+
+  return payload.data?.publication?.post ?? null;
 }

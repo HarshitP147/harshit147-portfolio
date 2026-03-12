@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import ApolloWrapper from "@/app/ApolloWrapper";
 import ScrollToTop from "@/components/ScrollToTop";
 import BottomBar from "@/components/BottomBar";
 import "./globals.css";
@@ -69,9 +68,7 @@ export default async function RootLayout({
             } catch (e) {}
           })();
         `}</Script>
-        <ApolloWrapper>
-          {children}    
-        </ApolloWrapper>
+        {children}
         <BottomBar initialTheme={initialTheme} />
         <ScrollToTop />
         <Analytics />

@@ -31,7 +31,11 @@ export default function NameGradient({
   return (
     <span className={`relative block ${className}`.trim()}>
       <span className="whitespace-normal xl:whitespace-nowrap">{text}</span>
-      <span className={`gradient-layer  ${theme === "light" ? "gradient-blue" : "gradient-red"} whitespace-normal xl:whitespace-nowrap absolute top-0 left-0`}>
+      <span
+        className={`gradient-layer  ${
+          theme === "light" ? "gradient-blue" : "gradient-red"
+        } whitespace-normal xl:whitespace-nowrap absolute top-0 left-0`}
+      >
         {text}
       </span>
     </span>
