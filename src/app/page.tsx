@@ -16,7 +16,7 @@ export default async function Home() {
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
-              <h1 className="max-w-[12em] text-3xl font-light tracking-[0.03em] sm:max-w-none sm:text-7xl xl:text-8xl">
+              <h1 className="max-w-[12em] text-4xl font-semibold tracking-[0.03em] sm:max-w-none sm:text-7xl sm:font-light xl:text-8xl">
                 <NameGradient className="font-geist" />
               </h1>
             </div>
