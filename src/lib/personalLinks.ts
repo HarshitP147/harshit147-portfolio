@@ -29,8 +29,8 @@ export const personalLinks: PersonalLink[] = [
   {
     platform: "instagram",
     label: "Instagram",
-    href: "https://www.instagram.com/therock/",
-    ariaLabel: "Open therock on Instagram",
+    href: "https://www.instagram.com/harshit._147/",
+    ariaLabel: "Open Harshit Pandit on Instagram",
   },
   {
     platform: "email",

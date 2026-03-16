@@ -10,7 +10,6 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 
 function isMobileDevice() {
   if (typeof window === "undefined") return false;
@@ -42,7 +41,6 @@ function Model() {
 }
 
 const FAST_SPEED = 350.0;
-const SLOW_SPEED = isMobileDevice() ? 0.0 : 7.0;
 const FAST_DURATION = 0.7;
 const SCENE_FLOOR_COLOR = "#36261b";
 const LIGHT_SCENE_VISUALS = {
@@ -55,6 +53,10 @@ const DARK_SCENE_VISUALS = {
   shadowOpacity: 1,
   shadowColor: "#000000",
 };
+
+function getSLOW_SPEED() {
+  return isMobileDevice() ? 0.0 : 7.0;
+}
 
 function isDarkTheme() {
   if (typeof window === "undefined") {
@@ -92,6 +94,7 @@ function Scene({
   const hasInteractedRef = useRef(false);
   const floorSetRef = useRef(false);
   const isMobile = isMobileDevice();
+  const slowSpeed = getSLOW_SPEED();
 
   useFrame((_, delta) => {
     if (!autoRotate || hasInteractedRef.current || !controlsRef.current) {
@@ -101,7 +104,7 @@ function Scene({
     elapsedRef.current += delta;
 
     const isFastPhase = elapsedRef.current < FAST_DURATION;
-    const targetSpeed = isFastPhase ? FAST_SPEED : SLOW_SPEED;
+    const targetSpeed = isFastPhase ? FAST_SPEED : slowSpeed;
     const dampingFactor = isFastPhase ? 2 : 7;
     const t = 1 - Math.exp(-dampingFactor * delta);
 
@@ -170,6 +173,7 @@ export default function ModelCanvas() {
 
   useEffect(() => {
     const calculatedDpr = getDevicePixelRatio();
+    
     setDpr([1, calculatedDpr]);
   }, []);
 
@@ -221,14 +225,13 @@ export default function ModelCanvas() {
         className="relative z-10"
         camera={{ position: [0, 0, 3], fov: 45 }}
         dpr={dpr}
-        shadows
+        shadows={isMobileDevice() ? false : "variance"}
         frameloop="demand"
         gl={{
           alpha: true,
           powerPreference: "low-power",
           antialias: isMobileDevice() ? false : true,
           preserveDrawingBuffer: false,
-
         }}
       >
         <Scene

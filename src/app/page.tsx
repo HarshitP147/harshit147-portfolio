@@ -1,11 +1,14 @@
+import dynamic from "next/dynamic";
+
 import NameGradient from "@/components/NameGradient";
-import ModelCanvas from "@/components/ModelCanvas";
+import ModelCanvasLazy from "@/components/ModelCanvasLazy";
 import TechMarquee from "@/components/TechMarquee";
 import { Suspense } from "react";
 import HomeLatestBlogs, { HomeLatestBlogsSkeleton } from "@/components/HomeLatestBlogs";
 import HomeFeaturedProjects from "@/components/HomeFeaturedProjects";
 import HomePersonalLinks from "@/components/HomePersonalLinks";
 import { sectionShellClassName, sectionTitleClassName } from "@/components/sectionStyles";
+
 
 export default async function Home() {
   const username =
@@ -18,7 +21,7 @@ export default async function Home() {
       <div className={sectionShellClassName()}>
         <main className="flex flex-col-reverse items-center justify-center gap-10 pb-10 pt-20 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
           <div className="flex w-full my-auto flex-col items-center gap-6 pt-6 text-center xl:items-start xl:pt-4 xl:text-left">
-            <div className="xl:-translate-y-22">
+            <div className="">
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
@@ -45,8 +48,8 @@ export default async function Home() {
               I'm currently exploring how AI models can be trained and deployed locally on edge devices, and how they can be used to build useful applications while preserving user privacy.
             </p>
           </div>
+          <ModelCanvasLazy />
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
-            <ModelCanvas />
           </div>
         </main>
         <TechMarquee />
