@@ -1,19 +1,33 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   Center,
   ContactShadows,
-  Html,
   OrbitControls,
   useGLTF,
 } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
+
+function isMobileDevice() {
+  if (typeof window === "undefined") return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  );
+}
+
+function getDevicePixelRatio() {
+  if (typeof window === "undefined") return 1;
+  const isMobile = isMobileDevice();
+  const dpr = window.devicePixelRatio || 1;
+  return isMobile ? Math.min(dpr, 1.5) : Math.min(dpr, 2);
+}
 
 function Model() {
-  const { scene } = useGLTF("/misc/scene.glb");
+  const { scene } = useGLTF("/misc/scene.glb", true);
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -27,19 +41,8 @@ function Model() {
   return <primitive object={scene} />;
 }
 
-function ModelLoader() {
-  return (
-    <Html center>
-      <div className="flex items-center gap-3 rounded-full bg-background/80 px-3 py-2 text-xs font-medium uppercase tracking-[0.3em] text-foreground/70 shadow-sm">
-        <span className="h-3 w-3 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground/70" />
-        Loading 3D
-      </div>
-    </Html>
-  );
-}
-
 const FAST_SPEED = 350.0;
-const SLOW_SPEED = 7.0;
+const SLOW_SPEED = isMobileDevice() ? 0.0 : 7.0;
 const FAST_DURATION = 0.7;
 const SCENE_FLOOR_COLOR = "#36261b";
 const LIGHT_SCENE_VISUALS = {
@@ -88,6 +91,7 @@ function Scene({
   const speedRef = useRef(FAST_SPEED);
   const hasInteractedRef = useRef(false);
   const floorSetRef = useRef(false);
+  const isMobile = isMobileDevice();
 
   useFrame((_, delta) => {
     if (!autoRotate || hasInteractedRef.current || !controlsRef.current) {
@@ -105,28 +109,30 @@ function Scene({
     controlsRef.current.autoRotateSpeed = speedRef.current;
   });
 
+  const mobileShadowProps = isMobile
+    ? { scale: 4, blur: 1.5, far: 4 }
+    : { scale: 8, blur: 2.6, far: 6 };
+
   return (
     <>
-      <hemisphereLight intensity={3.5} position={[0, 10, 0]} castShadow />
+      <hemisphereLight intensity={isMobile ? 2.0 : 3.5} position={[0, 10, 0]} castShadow />
       <directionalLight
         position={[0, 4.4, 3]}
-        intensity={5}
+        intensity={isMobile ? 3 : 5}
         castShadow
-        shadow-radius={4}
+        shadow-radius={isMobile ? 2 : 4}
       />
-      <Suspense fallback={<ModelLoader />}>
-        <group>
-          <Center
-            onCentered={({ boundingBox }) => {
-              if (floorSetRef.current) return;
-              floorSetRef.current = true;
-              setFloor({ y: boundingBox.min.y - 0.02 });
-            }}
-          >
-            <Model />
-          </Center>
-        </group>
-      </Suspense>
+      <group>
+        <Center
+          onCentered={({ boundingBox }) => {
+            if (floorSetRef.current) return;
+            floorSetRef.current = true;
+            setFloor({ y: boundingBox.min.y - 0.02 });
+          }}
+        >
+          <Model />
+        </Center>
+      </group>
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, floor.y, 0]}
@@ -139,9 +145,7 @@ function Scene({
         position={[0, floor.y + 0.01, 0]}
         opacity={shadowOpacity}
         color={shadowColor}
-        scale={8}
-        blur={2.6}
-        far={6}
+        {...mobileShadowProps}
       />
       <OrbitControls
         ref={controlsRef}
@@ -162,6 +166,12 @@ function Scene({
 
 export default function ModelCanvas() {
   const [sceneVisuals, setSceneVisuals] = useState(LIGHT_SCENE_VISUALS);
+  const [dpr, setDpr] = useState<[number, number]>([1, 1.5]);
+
+  useEffect(() => {
+    const calculatedDpr = getDevicePixelRatio();
+    setDpr([1, calculatedDpr]);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -171,8 +181,8 @@ export default function ModelCanvas() {
       const nextSceneVisuals = getSceneVisuals();
       setSceneVisuals((currentSceneVisuals) =>
         currentSceneVisuals.skyColor === nextSceneVisuals.skyColor &&
-        currentSceneVisuals.shadowOpacity === nextSceneVisuals.shadowOpacity &&
-        currentSceneVisuals.shadowColor === nextSceneVisuals.shadowColor
+          currentSceneVisuals.shadowOpacity === nextSceneVisuals.shadowOpacity &&
+          currentSceneVisuals.shadowColor === nextSceneVisuals.shadowColor
           ? currentSceneVisuals
           : nextSceneVisuals,
       );
@@ -210,9 +220,16 @@ export default function ModelCanvas() {
       <Canvas
         className="relative z-10"
         camera={{ position: [0, 0, 3], fov: 45 }}
-        dpr={[1, 1.5]}
+        dpr={dpr}
         shadows
-        gl={{ alpha: true }}
+        frameloop="demand"
+        gl={{
+          alpha: true,
+          powerPreference: "low-power",
+          antialias: isMobileDevice(),
+          preserveDrawingBuffer: false,
+
+        }}
       >
         <Scene
           shadowOpacity={sceneVisuals.shadowOpacity}

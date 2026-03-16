@@ -1,5 +1,5 @@
 import NameGradient from "@/components/NameGradient";
-import ModelCanvasLazy from "@/components/ModelCanvasLazy";
+import ModelCanvas from "@/components/ModelCanvas";
 import TechMarquee from "@/components/TechMarquee";
 import { Suspense } from "react";
 import HomeLatestBlogs, { HomeLatestBlogsSkeleton } from "@/components/HomeLatestBlogs";
@@ -33,7 +33,7 @@ export default async function Home() {
               I completed my Bachelors in Computer Engineering from Trinity College Dublin in 2025. I have a keen interest in artificial intelligence,  web development and computer graphics.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I currently work as a Fullstack Developer Intern at{" "}
+              I work as an Intern at{" "}
               <a
                 href="https://www.linkedin.com/company/gaddr/"
                 target="_blank"
@@ -42,11 +42,11 @@ export default async function Home() {
               >
                 Gaddr
               </a>.
-        
+              I'm currently exploring how AI models can be trained and deployed locally on edge devices, and how they can be used to build useful applications while preserving user privacy.
             </p>
           </div>
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
-            <ModelCanvasLazy />
+            <ModelCanvas />
           </div>
         </main>
         <TechMarquee />
