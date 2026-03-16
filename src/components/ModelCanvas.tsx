@@ -226,7 +226,7 @@ export default function ModelCanvas() {
         gl={{
           alpha: true,
           powerPreference: "low-power",
-          antialias: isMobileDevice(),
+          antialias: isMobileDevice() ? false : true,
           preserveDrawingBuffer: false,
 
         }}
