@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import ModelCanvas from "./ModelCanvas";
-
 function ModelCanvasPoster() {
   return (
     <div
@@ -23,16 +21,65 @@ function ModelCanvasPoster() {
   );
 }
 
-// const ModelCanvas = dynamic(() => import("@/components/ModelCanvas"), {
-//   ssr: false,
-//   loading: () => <ModelCanvasPoster />,
-// });
+const ModelCanvas = dynamic(() => import("@/components/ModelCanvas"), {
+  ssr: false,
+  loading: () => <ModelCanvasPoster />,
+});
 
 export default function ModelCanvasLazy() {
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const loadAttemptedRef = useRef(false);
+
+  const triggerLoad = () => {
+    if (loadAttemptedRef.current) return;
+    loadAttemptedRef.current = true;
+    setShouldLoad(true);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (document.readyState === "complete") {
+      setTimeout(() => triggerLoad(), 0);
+      return;
+    }
+
+    const handleLoad = () => triggerLoad();
+    window.addEventListener("load", handleLoad, { once: true });
+
+    return () => window.removeEventListener("load", handleLoad);
+  }, []);
+
+  useEffect(() => {
+    if (shouldLoad) return;
+
+    const node = wrapperRef.current;
+    if (!node) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setTimeout(() => triggerLoad(), 0);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          triggerLoad();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [shouldLoad]);
 
   return (
-    <div className="flex w-full justify-center xl:w-auto xl:justify-end">
-      <ModelCanvas />
+    <div ref={wrapperRef}>
+      {shouldLoad ? <ModelCanvas /> : <ModelCanvasPoster />}
     </div>
   );
 }

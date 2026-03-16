@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import { sectionTitleClassName } from "@/components/sectionStyles";
 
 type TechItem = {
@@ -63,12 +64,13 @@ function MarqueeItem({ item }: { item: TechItem }) {
       title={item.label}
       tabIndex={0}
     >
-      <img
+      <Image
         src={item.src}
         alt=""
+        width={64}
+        height={64}
         className={`h-11 w-11 object-contain sm:h-14 sm:w-14 lg:h-16 lg:w-16 ${item.invertAlways ? "always-invert" : item.invert ? "auto-invert" : ""}`.trim()}
         loading="lazy"
-        decoding="async"
         fetchPriority="low"
         draggable={false}
       />

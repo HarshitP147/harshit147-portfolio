@@ -1,5 +1,3 @@
-import dynamic from "next/dynamic";
-
 import NameGradient from "@/components/NameGradient";
 import ModelCanvasLazy from "@/components/ModelCanvasLazy";
 import TechMarquee from "@/components/TechMarquee";
@@ -23,7 +21,7 @@ export default async function Home() {
           <div className="flex w-full my-auto flex-col items-center gap-6 pt-6 text-center xl:items-start xl:pt-4 xl:text-left">
             <div className="">
               <p className={sectionTitleClassName()}>
-                Hi, I&apos;m
+                Hi, I{`'`}m
               </p>
               <h1 className="max-w-[12em] text-4xl font-semibold tracking-[0.03em] sm:max-w-none sm:text-7xl sm:font-light xl:text-8xl">
                 <NameGradient className="font-geist" />
@@ -44,12 +42,13 @@ export default async function Home() {
                 className="font-medium underline underline-offset-4"
               >
                 Gaddr
-              </a>.
-              I'm currently exploring how AI models can be trained and deployed locally on edge devices, and how they can be used to build useful applications while preserving user privacy.
+              </a>
+              .
+              I{`'`}m currently exploring how AI models can be trained and deployed locally on edge devices, and how they can be used to build useful applications while preserving user privacy.
             </p>
           </div>
-          <ModelCanvasLazy />
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
+            <ModelCanvasLazy />
           </div>
         </main>
         <TechMarquee />

@@ -173,8 +173,11 @@ export default function ModelCanvas() {
 
   useEffect(() => {
     const calculatedDpr = getDevicePixelRatio();
-    
-    setDpr([1, calculatedDpr]);
+
+    // Use setTimeout to avoid setState in effect
+    setTimeout(() => {
+      setDpr([1, calculatedDpr]);
+    }, 0);
   }, []);
 
   useEffect(() => {

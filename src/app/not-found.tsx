@@ -14,24 +14,27 @@ export default function NotFoundPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setCanGoBack(window.history.length > 1)
+      const checkHistory = () => setCanGoBack(window.history.length > 1);
+      checkHistory();
     }
-  }, [setCanGoBack])
+  }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") return;
     try {
-      const origin = window.location.origin
-      const ref = document.referrer
-      if (!ref) return
-      const parsed = new URL(ref)
+      const origin = window.location.origin;
+      const ref = document.referrer;
+      if (!ref) return;
+      const parsed = new URL(ref);
       if (parsed.origin === origin) {
-        setReferrer(parsed.pathname + parsed.search + parsed.hash)
+        setTimeout(() => {
+          setReferrer(parsed.pathname + parsed.search + parsed.hash);
+        }, 0);
       }
     } catch {
       // ignore parsing errors
     }
-  }, [])
+  }, []);
 
   const displayPath = useMemo(() => {
     const query = searchParams?.toString()

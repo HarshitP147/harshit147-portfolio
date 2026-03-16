@@ -49,19 +49,22 @@ export default function ThemeToggle({
 
   useEffect(() => {
     if (!didInit.current) {
-      const preferred = getPreferredTheme()
-      didInit.current = true
-      setTheme(preferred)
-      applyTheme(preferred)
-      window.localStorage.setItem(STORAGE_KEY, preferred)
-      document.cookie = `theme=${preferred}; path=/; max-age=31536000; samesite=lax`
-      return
+      const preferred = getPreferredTheme();
+      didInit.current = true;
+      // Use setTimeout to avoid setState in effect
+      setTimeout(() => {
+        setTheme(preferred);
+      }, 0);
+      applyTheme(preferred);
+      window.localStorage.setItem(STORAGE_KEY, preferred);
+      document.cookie = `theme=${preferred}; path=/; max-age=31536000; samesite=lax`;
+      return;
     }
 
-    applyTheme(theme)
-    window.localStorage.setItem(STORAGE_KEY, theme)
-    document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`
-  }, [theme])
+    applyTheme(theme);
+    window.localStorage.setItem(STORAGE_KEY, theme);
+    document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`;
+  }, [theme]);
 
   const isDark = theme === "dark"
   return (
