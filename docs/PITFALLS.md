@@ -25,10 +25,11 @@
 - Pitfall: avoid using `transform` scaling (e.g., `scale-*`) to size layout columns. Transforms do not affect layout and can collapse or misalign sibling columns; size via widths/heights or grid columns instead.
 - Pitfall: for hover-only borders, use `border-transparent` with explicit `transition-[border-color]` and `hover:border-*`. If theme alpha makes the border hard to see, add a subtle hover `box-shadow` outline.
 - Theme toggle must initialize from stored preference and cookie to avoid theme flipping on navigation.
-- `framer-motion` must only be used in client components; use a wrapper like `src/components/BackToHomeLink.tsx`.
+- `framer-motion` has been removed; keep animations CSS-only unless there is a strong need for a library.
 - Scroll-to-top button is fixed bottom-center; pages with footer text may need extra bottom padding to avoid overlap.
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
-- Homepage "My Blogs" uses `HomeLatestBlogs` and shows "Read more" only when `pageInfo.hasNextPage`.
+- Homepage "My Blogs" uses `HomeLatestBlogs` (server-rendered) and shows "Read more" only when `hasNextPage` from `fetchHashnodePosts`.
+- Blog list and post detail (`/blog`, `/blog/[slug]`) are server-rendered via `fetchHashnodePosts`/`fetchHashnodePostBySlug`; set `HASHNODE_USERNAME` (and optionally `HASHNODE_PUBLICATION_HOST`) in env.
 - Homepage "Projects" uses `HomeFeaturedProjects` with local typed data from `src/lib/featuredProjects.ts`.
 - Projects stack presentation is inline metadata separated by dots (`•`) instead of pill badges.
 - Projects GitHub actions use `lucide-react` `Github` icon and shared blue hover/focus color with text.

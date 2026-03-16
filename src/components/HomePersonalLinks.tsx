@@ -13,29 +13,26 @@ export default function HomePersonalLinks() {
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
             My online presence where you can find me. Feel free to connect!
           </p>
-
         </div>
 
-        <div className="flex flex-col align-middle items-center md:flex-row gap-16">
-          <div className="w-full  ">
+        <div className="flex flex-col items-center gap-16 sm:flex-row sm:items-stretch sm:h-[360px]">
+          <div className="flex w-full items-center justify-center  sm:w-[95%]   sm:h-full">
             <Image
-              src="/misc/me_real_clear.png"
-              alt="Harshit sitting behind a laptop and smiling"
+              src="/misc/harshit-image.jpeg"
+              alt="Harshit sitting behind a laptop"
               width={300}
-              height={100}
-              sizes="(max-width: 768px) 70vw, (max-width: 1024px) 50vw, 360px"
-              className="mx-auto h-3/5 rounded-3xl bg-muted/20 object-cover md:w-full"
+              height={400}
+              sizes="(max-width: 768px) 70vw, 320px"
+              className="h-full w-auto max-w-[320px] rounded-3xl bg-muted/20 object-cover shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
               loading="lazy"
               decoding="async"
               fetchPriority="low"
               priority={false}
             />
-
           </div>
           <SocialLinksStack links={personalLinks} />
         </div>
         <SocialLinksDock links={personalLinks} />
-
       </div>
     </section>
   );

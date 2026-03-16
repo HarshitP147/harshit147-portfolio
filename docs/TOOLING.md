@@ -10,3 +10,4 @@
 - Production run: `npm run start`.
 - Lint: `npm run lint`.
 - GraphQL Codegen: `npm run codegen` (config in `codegen.ts`, output `src/lib/graphql/generated.ts`).
+- Animation: `framer-motion` removed; prefer CSS transitions/animations for micro-interactions.

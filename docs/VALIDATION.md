@@ -24,3 +24,6 @@
 - First render shows stable count and correct singular/plural label (`Like` vs `Likes`).
 - Slow network still feels responsive (optimistic update), and UI rolls back on failed requests.
 - Like/unlike works across multiple browsers without hydration or route-param warnings.
+- Heart icon fills pink in both light and dark themes when liked; remains outlined muted when not.
+- Like button pulse animation triggers once per tap/click without jitter.
+- No `framer-motion` import appears in the bundle (animation is CSS-only).

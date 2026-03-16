@@ -18,7 +18,7 @@ export default async function Home() {
       <div className={sectionShellClassName()}>
         <main className="flex flex-col-reverse items-center justify-center gap-10 pb-10 pt-20 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
           <div className="flex w-full my-auto flex-col items-center gap-6 pt-6 text-center xl:items-start xl:pt-4 xl:text-left">
-            <div className="xl:-translate-y-24">
+            <div className="xl:-translate-y-22">
               <p className={sectionTitleClassName()}>
                 Hi, I&apos;m
               </p>
@@ -27,7 +27,10 @@ export default async function Home() {
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I have a Bachelors of Engineering in Computer Engineering from Trinity College Dublin. I have a keen interest in artificial intelligence,  web development and computer graphics.
+              I am a software engineer based in Dublin, Ireland. I have a passion for building applications that make an impact.
+            </p>
+            <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
+              I completed my Bachelors in Computer Engineering from Trinity College Dublin in 2025. I have a keen interest in artificial intelligence,  web development and computer graphics.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
               I currently work as a Fullstack Developer Intern at{" "}

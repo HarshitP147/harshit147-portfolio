@@ -21,6 +21,8 @@
 - Avoid introducing horizontal overflow in medium breakpoints.
 - Keep `ModelCanvas` interactions constrained for UX consistency.
 - Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` should mirror placement and styling for its "Go back" link (top-left, muted, underline offset).
+- Blog list/detail are server-rendered via `fetchHashnodePosts`/`fetchHashnodePostBySlug`; do not reintroduce client Apollo fetching on these routes.
+- Avoid adding `framer-motion`; prefer CSS transitions/animations (like button uses CSS pulse and explicit pink fill).
 - Store new static assets in `public/` and reference them by absolute web path (`/asset.ext`).
 - Pixel units are allowed for sizing; keep values aligned with existing layout scales and tokens.
 - Keep imports alias-first (`@/...`) instead of long relative paths.
