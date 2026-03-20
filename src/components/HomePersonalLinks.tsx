@@ -18,7 +18,7 @@ export default function HomePersonalLinks() {
         <div className="flex flex-col items-center gap-16 sm:flex-row sm:items-stretch sm:h-[360px]">
           <div className="flex w-full items-center justify-center  sm:w-[95%]   sm:h-full">
             <Image
-              src="/misc/harshit-image.jpeg"
+              src="/misc/harshit-image.png"
               alt="Harshit sitting behind a laptop"
               width={300}
               height={400}
