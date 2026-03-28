@@ -34,7 +34,7 @@
 
 ### Upstash Redis (Likes)
 - **Reset likes for a post in Upstash**:
-  - Delete key `likes:post:<postId>` (or set to `0`) in the Redis console.
+  - Delete key `likes:post:<postId>` in the Redis console.
 
 ### Theme and Styling
 - **Update theme colors**:

@@ -24,3 +24,14 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Add security and caching headers for static assets
+export const headers = async () => [{
+  source: '/:all*(js|css|svg|png|jpg|jpeg|webp|ico|json)',
+  headers: [
+    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+    { key: 'X-Content-Type-Options', value: 'nosniff' },
+    { key: 'X-Frame-Options', value: 'DENY' },
+    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  ],
+}];

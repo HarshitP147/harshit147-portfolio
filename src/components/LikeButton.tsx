@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import {
+  type LikeMutationRequest,
+  type LikeResponse,
+} from "@/lib/likes";
 import { cn } from "@/lib/utils";
 
 type LikeButtonProps = {
   postId: string;
+  slug: string;
   className?: string;
-};
-
-type LikeResponse = {
-  postId: string;
-  likes: number;
 };
 
 const REQUEST_TIMEOUT_MS = 8000;
 
-export default function LikeButton({ postId, className }: LikeButtonProps) {
-  const storageKey = useMemo(() => `liked:post:${postId}`, [postId]);
+export default function LikeButton({
+  postId,
+  slug,
+  className,
+}: LikeButtonProps) {
   const hasUserInteracted = useRef(false);
   const [likes, setLikes] = useState<number | null>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -31,11 +34,11 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
     }
 
     hasUserInteracted.current = false;
-    setIsLiked(window.localStorage.getItem(storageKey) === "1");
 
     const controller = new AbortController();
 
     fetch(`/api/likes/${encodeURIComponent(postId)}`, {
+      cache: "no-store",
       method: "GET",
       signal: controller.signal,
     })
@@ -50,11 +53,12 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
           return;
         }
         setLikes(Number.isFinite(payload.likes) ? payload.likes : 0);
+        setIsLiked(payload.liked === true);
       })
       .catch(() => undefined);
 
     return () => controller.abort();
-  }, [postId, storageKey]);
+  }, [postId]);
 
   const handleLike = async () => {
     if (isLoading) {
@@ -80,34 +84,30 @@ export default function LikeButton({ postId, className }: LikeButtonProps) {
         setPulse(false);
       }, 160);
     });
-    if (nextIsLiked) {
-      window.localStorage.setItem(storageKey, "1");
-    } else {
-      window.localStorage.removeItem(storageKey);
-    }
 
     setIsLoading(true);
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
+      const requestPayload: LikeMutationRequest = { slug };
       const response = await fetch(`/api/likes/${encodeURIComponent(postId)}`, {
+        body: JSON.stringify(requestPayload),
+        headers: {
+          "content-type": "application/json",
+        },
         method: nextIsLiked ? "POST" : "DELETE",
         signal: controller.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to update likes");
       }
-      const payload = (await response.json()) as LikeResponse;
-      setLikes(Number.isFinite(payload.likes) ? payload.likes : 0);
+      const responsePayload = (await response.json()) as LikeResponse;
+      setLikes(Number.isFinite(responsePayload.likes) ? responsePayload.likes : 0);
+      setIsLiked(responsePayload.liked === true);
     } catch {
       setIsLiked(previousIsLiked);
       setLikes(previousLikes);
-      if (previousIsLiked) {
-        window.localStorage.setItem(storageKey, "1");
-      } else {
-        window.localStorage.removeItem(storageKey);
-      }
     } finally {
       window.clearTimeout(timeoutId);
       setIsLoading(false);

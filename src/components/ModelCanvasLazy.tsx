@@ -69,7 +69,7 @@ export default function ModelCanvasLazy() {
           observer.disconnect();
         }
       },
-      { rootMargin: "200px 0px" },
+      { rootMargin: "300px 0px" },
     );
 
     observer.observe(node);

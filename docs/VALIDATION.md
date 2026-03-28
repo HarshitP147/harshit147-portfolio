@@ -43,9 +43,11 @@
 - First render shows stable count and correct singular/plural label (`Like` vs `Likes`).
 - Slow network still feels responsive (optimistic update), and UI rolls back on failed requests.
 - Like/unlike works across multiple browsers without hydration or route-param warnings.
+- Refreshing a post keeps the current visitor's liked state without using `localStorage`.
 - Heart icon fills pink in both light and dark themes when liked; remains outlined muted when not.
 - Like button pulse animation triggers once per tap/click without jitter.
 - No `framer-motion` import appears in the bundle (animation is CSS-only).
+- Repeated likes from the same visitor do not increase the count more than once, and the stored post JSON keeps the post slug plus one metadata entry per active liker, including any available Vercel geo headers and inferred OS/device type.
 
 ### TechMarquee Changes
 - Icons render at correct size on all screen sizes.

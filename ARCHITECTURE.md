@@ -66,12 +66,12 @@ Env vars:
 
 ## Likes Service (Upstash)
 - API routes are in `src/app/api/likes/[postId]/route.ts` and use `@upstash/redis` `Redis.fromEnv()`.
-- Likes key format is `likes:post:${postId}`.
+- Each post is stored under a single Redis key `likes:post:${postId}` whose value is a JSON document with `slug` and a `likes` array.
 
 Required env vars for likes: `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or Upstash equivalents `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`).
 - In Next.js 16 dynamic route handlers, `params` is async: type as `params: Promise<{ postId: string }>` and `await params` before property access.
-- `DELETE` (unlike) clamps likes to `>= 0` and normalizes zero values.
+- Likes API uses `cookies()` + `headers()` from `next/headers` to assign a persistent visitor ID cookie and capture IP-derived geo metadata (`x-vercel-ip-country`, `x-vercel-ip-city`, `x-vercel-ip-latitude`, `x-vercel-ip-longitude`, `x-vercel-ip-postal-code`, `x-vercel-ip-timezone`), inferred OS/device type from `user-agent`, and a server timestamp inside each entry in the `likes` array.
 - `LikeButton` is rendered on blog detail at the bottom separator, centered between two horizontal lines.
 - `LikeButton` uses an inline SVG heart (not lucide) animated with `framer-motion`.
 - Like/unlike UI is optimistic with rollback on request failure/timeout (8s).
-- Duplicate-like prevention is client-side only via `localStorage` key `liked:post:${postId}` (not server-enforced identity).
+- Duplicate-like prevention is server-enforced per visitor cookie; the client no longer stores like state in `localStorage`.

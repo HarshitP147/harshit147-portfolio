@@ -8,7 +8,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import BottomBar from "@/components/BottomBar";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

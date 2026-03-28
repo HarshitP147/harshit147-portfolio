@@ -15,6 +15,10 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const HASHNODE_EMBED_PATTERN = /^\s*%\[(https?:\/\/[^\]\s]+)\]\s*$/gm;
+const HASHNODE_IMAGE_WITH_ALIGN_PATTERN =
+  /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\s+align=(?:"[^"]*"|'[^']*')\)/gm;
+const HASHNODE_IMAGE_SPLIT_LINE_PATTERN =
+  /!\[([^\]]*)\]\s*\n+\s*\((https?:\/\/[^\s)]+)(?:\s+align=(?:"[^"]*"|'[^']*'))?\)/gm;
 
 type BlogPostDetailApolloLoggerProps = {
   publicationHost: string;
@@ -41,7 +45,17 @@ function getEmbedMarkup(rawUrl: string): string {
 }
 
 function transformHashnodeMarkdown(markdown: string): string {
-  return markdown.replace(HASHNODE_EMBED_PATTERN, (_, url: string) =>
+  const normalizedImages = markdown
+    .replace(
+      HASHNODE_IMAGE_WITH_ALIGN_PATTERN,
+      (_match, alt: string, url: string) => `![${alt}](${url})`,
+    )
+    .replace(
+      HASHNODE_IMAGE_SPLIT_LINE_PATTERN,
+      (_match, alt: string, url: string) => `![${alt}](${url})`,
+    );
+
+  return normalizedImages.replace(HASHNODE_EMBED_PATTERN, (_, url: string) =>
     getEmbedMarkup(url),
   );
 }
@@ -182,7 +196,7 @@ export default async function BlogPostDetailApolloLogger({
         </div>
         <div className="my-6 flex w-full items-center gap-4 text-muted-foreground">
           <span className="h-px flex-1 bg-border/70" />
-          <LikeButton postId={post.id ?? post.slug} />
+          <LikeButton postId={post.id ?? post.slug} slug={post.slug} />
           <span className="h-px flex-1 bg-border/70" />
         </div>
       </article>
