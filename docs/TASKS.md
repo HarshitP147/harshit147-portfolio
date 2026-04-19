@@ -35,6 +35,15 @@
 ### Upstash Redis (Likes)
 - **Reset likes for a post in Upstash**:
   - Delete key `likes:post:<postId>` in the Redis console.
+- **Backfill existing like metadata after schema changes**:
+  - Existing stored entries with blank or older fields will not update until the post document is rewritten.
+  - Rewrite the JSON value for `likes:post:<postId>` (or run a one-off migration) if you need all historical entries to include the latest metadata fields or replace old blank geo values with `"unknown"`.
+
+### Featured Projects
+- **Update featured projects list**:
+  - Edit `src/lib/featuredProjects.ts` — array of `FeaturedProject` objects with `title`, `domain`, `description`, `stack` (array), and `links` (GitHub, etc.).
+  - Set `isCurrent: true` on the project actively being worked on; only one should have this flag.
+  - Projects appear on homepage in order; first in array shows at top.
 
 ### Theme and Styling
 - **Update theme colors**:

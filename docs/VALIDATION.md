@@ -48,6 +48,8 @@
 - Like button pulse animation triggers once per tap/click without jitter.
 - No `framer-motion` import appears in the bundle (animation is CSS-only).
 - Repeated likes from the same visitor do not increase the count more than once, and the stored post JSON keeps the post slug plus one metadata entry per active liker, including any available Vercel geo headers and inferred OS/device type.
+- On deployed Vercel traffic, confirm geo fields populate when Vercel provides them; on local development or privacy-masked IPs, confirm the stored fallback is `"unknown"` instead of an empty string.
+- Do not expect exact location from the likes flow; verify that no browser geolocation prompt is introduced.
 
 ### TechMarquee Changes
 - Icons render at correct size on all screen sizes.

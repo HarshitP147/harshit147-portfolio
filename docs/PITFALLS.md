@@ -37,6 +37,8 @@
 - Social dock: mobile icon buttons do not use circular borders (dock is borderless).
 - Pitfall: incorrect `sizes` values can force low-res images; keep the fallback width aligned with the actual container width.
 - Pitfall: `IntersectionObserver` `rootMargin` only accepts `px` or `%` (not `rem`).
+- Likes metadata is IP-derived, not GPS-derived. If Vercel does not provide geo headers for a request, store `"unknown"` and do not expect exact user location.
+- Local `next dev` traffic will not mirror deployed Vercel geo behavior; test likes metadata on a real Vercel deployment before assuming the headers are broken.
 
 ### Asset Organization
 - Public assets reorganized into `public/marquee/top`, `public/marquee/bottom`, and `public/misc`; update paths in `TechMarquee` and `ModelCanvas` accordingly.

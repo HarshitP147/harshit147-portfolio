@@ -14,6 +14,20 @@ export type FeaturedProject = {
 
 export const featuredProjects: FeaturedProject[] = [
   {
+    title: "LM Studio CLI",
+    domain: "Developer Tools",
+    description:
+      "A terminal REPL for chatting with local LM Studio models over their OpenAI-compatible API, with planned tool use and MCP support.",
+    stack: ["TypeScript", "React", "Ink", "Node.js", "LM Studio"],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/HarshitP147/lm-cli",
+      },
+    ],
+    isCurrent: true,
+  },
+  {
     title: "Portfolio Website",
     domain: "Fullstack Web",
     description:
@@ -31,7 +45,6 @@ export const featuredProjects: FeaturedProject[] = [
         href: "https://github.com/HarshitP147/harshit147-portfolio",
       },
     ],
-    isCurrent: true,
   },
   {
     title: "MNIST Imagen",
@@ -43,19 +56,6 @@ export const featuredProjects: FeaturedProject[] = [
       {
         label: "GitHub",
         href: "https://github.com/HarshitP147/mnist-imagen",
-      },
-    ],
-  },
-  {
-    title: "Solarpunk Scene explorer",
-    domain: "Computer Graphics",
-    description:
-      "A C++ OpenGL renderer that builds a futuristic Emerald Isle scene with a custom real-time graphics pipeline.",
-    stack: ["C++", "OpenGL", "CMake"],
-    links: [
-      {
-        label: "GitHub",
-        href: "https://github.com/HarshitP147/landscape-opengl-Graphics",
       },
     ],
   },

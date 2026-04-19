@@ -29,7 +29,7 @@
 - `src/components/BlogPostDetailApolloLogger.tsx`: Blog detail renderer (Hashnode markdown + embeds + metadata).
 - `src/components/LikeButton.tsx`: Blog like/unlike control with optimistic updates and animated SVG heart.
 - `src/components/sectionStyles.ts`: Shared section container/title class helpers for consistent homepage spacing/alignment.
-- `src/lib/featuredProjects.ts`: Typed local data source for featured project metadata rendered on homepage.
+- `src/lib/featuredProjects.ts`: Typed data source for featured projects. Schema: `title`, `domain` (category), `description` (single line), `stack` (tech array), `links` (GitHub etc), optional `isCurrent: true` flag for actively-developed projects. Rendered on homepage via `HomeFeaturedProjects`.
 - `src/lib/graphql/generated.ts`: GraphQL Codegen output (types + typed documents).
 - `src/components/ui/*`: Reusable form/menu/dialog/card primitives built on Base UI.
 - `src/lib/utils.ts`: `cn()` utility (`clsx` + `tailwind-merge`).
@@ -71,6 +71,8 @@ Env vars:
 Required env vars for likes: `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or Upstash equivalents `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`).
 - In Next.js 16 dynamic route handlers, `params` is async: type as `params: Promise<{ postId: string }>` and `await params` before property access.
 - Likes API uses `cookies()` + `headers()` from `next/headers` to assign a persistent visitor ID cookie and capture IP-derived geo metadata (`x-vercel-ip-country`, `x-vercel-ip-city`, `x-vercel-ip-latitude`, `x-vercel-ip-longitude`, `x-vercel-ip-postal-code`, `x-vercel-ip-timezone`), inferred OS/device type from `user-agent`, and a server timestamp inside each entry in the `likes` array.
+- Geo values are only as good as the incoming Vercel headers. On local development, VPN/proxy traffic, or requests where Vercel cannot resolve IP geo, fields fall back to `"unknown"`.
+- Exact device location is not available through this path. It would require browser geolocation permission and is intentionally not part of the likes flow.
 - `LikeButton` is rendered on blog detail at the bottom separator, centered between two horizontal lines.
 - `LikeButton` uses an inline SVG heart (not lucide) animated with `framer-motion`.
 - Like/unlike UI is optimistic with rollback on request failure/timeout (8s).
