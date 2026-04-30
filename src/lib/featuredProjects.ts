@@ -14,17 +14,12 @@ export type FeaturedProject = {
 
 export const featuredProjects: FeaturedProject[] = [
   {
-    title: "LM Studio CLI",
-    domain: "Developer Tools",
+    title: "SuperScaler AI",
+    domain: "AI Platform",
     description:
-      "A terminal REPL for chatting with local LM Studio models over their OpenAI-compatible API, with planned tool use and MCP support.",
-    stack: ["TypeScript", "React", "Ink", "Node.js", "LM Studio"],
-    links: [
-      {
-        label: "GitHub",
-        href: "https://github.com/HarshitP147/lm-cli",
-      },
-    ],
+      "An AI platform that upscales images and videos to higher resolutions with AI.",
+    stack: ["Next.js", "Supabase", "Daisy UI", "Fal AI"],
+    links: [],
     isCurrent: true,
   },
   {

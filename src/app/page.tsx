@@ -34,7 +34,7 @@ export default async function Home() {
               I completed my Bachelors in Computer Engineering from Trinity College Dublin in 2025. I have a keen interest in artificial intelligence,  web development and computer graphics.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I{`'`}m currently exploring how AI models can be deployed locally and how one can run a coding harness on top of it, ensuring complete user privacy.
+              I{`'`}m currently exploring how AI models can be used to integrate into existing applications, how they provide real value to non-technical users, understanding their limitations and exploring concepts that enables an individual to run them on their own hardware.
             </p>
           </div>
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
