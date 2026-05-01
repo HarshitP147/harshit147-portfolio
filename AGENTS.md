@@ -25,11 +25,18 @@ This file is a lookup map. The detailed, authoritative documentation lives under
 - Location: `src/components/ModelCanvasLazy.tsx`
 - Shows poster placeholder until loaded; uses IntersectionObserver with 200px margin.
 
+### Blog Image Tap-to-Expand
+- All blog images (cover + inline markdown) wrap in `ZoomableImage` (`src/components/ZoomableImage.tsx`).
+- iOS App Store-style FLIP transition: tap → grow to centered hero; tap, scroll, or Escape → collapse to slot.
+- Pure CSS (`transform` + `transition`); no animation library.
+- Aspect ratio derived from `naturalWidth/naturalHeight` via `onLoad` to avoid distortion.
+
 ### Linting
 - Run: `npm run lint`
 - Auto-generated file: `src/lib/graphql/generated.ts` (ignored by ESLint)
 - Common fixes:
-  - setState in useEffect → wrap in `setTimeout(() => ..., 0)`
+  - `react-hooks/set-state-in-effect` (React 19) → don't call `setState` in effect body. For matchMedia/storage subscriptions use `useSyncExternalStore`. Defer with `setTimeout(..., 0)` or `requestAnimationFrame` only as a last resort.
+  - `react-hooks/refs` → don't read `ref.current` during render. Use state for values needed in JSX.
   - JSX in try/catch → use helper functions
   - Unescaped entities → use `I{`'`}m` syntax
   - `<img>` tags → use `next/image`

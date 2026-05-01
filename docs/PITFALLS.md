@@ -15,7 +15,11 @@
 - **Critical**: `SLOW_SPEED` must be computed synchronously in `Scene` component via `getSLOW_SPEED()`, not as module-level variable in useEffect.
 
 ### Linting and Code Quality
-- **setState in useEffect**: Avoid calling `setState` synchronously within effects. Use `setTimeout(() => setState(...), 0)` for initialization that must happen after mount.
+- **`react-hooks/set-state-in-effect`** (React 19): synchronous `setState` in an effect body is now a hard error, not a warning.
+  - For `matchMedia`/storage/external subscriptions, prefer `useSyncExternalStore` with `subscribe`, `getSnapshot`, and `getServerSnapshot` callbacks (see `ZoomableImage` for the `prefers-reduced-motion` pattern).
+  - For one-shot mount flags (e.g. SSR portal gating), restructure to remove the flag entirely if possible — initial state usually keeps portals from rendering during SSR.
+  - As a last resort, defer with `setTimeout(() => setState(...), 0)` or schedule inside `requestAnimationFrame`. State changes inside rAF/setTimeout callbacks do not trip the rule.
+- **`react-hooks/refs`** (React 19): reading `ref.current` during render fails. Move ref-derived values that are read in JSX into `useState`. Refs are still fine for DOM nodes accessed only in event handlers and effects (e.g. `wrapperRef`, `cloneRef` in `ZoomableImage`).
 - **JSX in try/catch**: Don't construct JSX directly inside try/catch blocks. Instead, assign to a variable and return outside, or use helper functions.
 - **Unescaped entities**: Use template syntax like `I{`'`}m` instead of `I'm` or `I&apos;m` to avoid ESLint `react/no-unescaped-entities` errors.
 - **Generated GraphQL types**: `src/lib/graphql/generated.ts` is auto-generated and ignored by ESLint. Custom scalars (`DateTime`, `ObjectId`, `TimeZone`, `URL`) use `any` types by design.
@@ -65,3 +69,13 @@
 - Projects stack presentation is inline metadata separated by dots (`•`) instead of pill badges.
 - Projects GitHub actions use `lucide-react` `Github` icon and shared blue hover/focus color with text.
 - The portfolio project can be marked with `isCurrent` in data to show the `Current` badge.
+
+### Blog Image Tap-to-Expand (May 2026)
+- `ZoomableImage` wraps every blog image (cover + inline). Inline images are wired via the `markdownComponents.img` override in `BlogPostDetailApolloLogger.tsx`.
+- Uses `<Image fill>` with the wrapper carrying an `aspectRatio` style derived from the image's natural dimensions on load. **Do not** pass arbitrary fixed `width`/`height` and rely on `h-auto w-full` — that distorts when natural aspect differs from the supplied ratio.
+- FLIP math animates `transform: translate + scale` only — never `width`/`height` — so frames stay on the compositor.
+- Source button is `visibility: hidden` while expanded; layout slot is preserved so collapse-on-scroll lands on the still-correct rect after page scroll.
+- Scroll is a dismiss trigger; do not also lock body scroll. Listener is `passive: true, capture: true` and lives only in the `open` phase.
+- `prefers-reduced-motion` is read via `useSyncExternalStore` (not a `useEffect` + `setState` subscription) to satisfy `react-hooks/set-state-in-effect`.
+- Portal is rendered into `document.body` only when `phase !== "idle"`; no `mounted` flag needed because SSR never enters a non-idle phase.
+- `<button>` is the trigger element (phrasing content, valid inside `<p>` from markdown). `border-0 p-0` resets default button chrome.

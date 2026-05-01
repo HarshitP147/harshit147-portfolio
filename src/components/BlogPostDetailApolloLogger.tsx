@@ -1,11 +1,11 @@
 import { Clock3 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
 import LikeButton from "@/components/LikeButton";
+import ZoomableImage from "@/components/ZoomableImage";
 import { fetchHashnodePostBySlug } from "@/lib/hashnode";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -88,16 +88,14 @@ const markdownComponents: Components = {
     }
 
     return (
-      <span className="not-prose my-6 block overflow-hidden rounded-2xl border border-border/70 bg-card">
-        <Image
-          src={imageSource}
-          alt={alt ?? ""}
-          width={1600}
-          height={900}
-          sizes="(max-width: 768px) 100vw, 768px"
-          className="h-auto w-full"
-        />
-      </span>
+      <ZoomableImage
+        src={imageSource}
+        alt={alt ?? ""}
+        width={1600}
+        height={900}
+        sizes="(max-width: 768px) 100vw, 768px"
+        className="my-6 border border-border/70"
+      />
     );
   },
 };
@@ -169,16 +167,16 @@ export default async function BlogPostDetailApolloLogger({
             </div>
           </div>
           {post.coverImage?.url ? (
-            <div className="overflow-hidden rounded-3xl border border-foreground/10 bg-foreground/5">
-              <Image
-                src={post.coverImage.url}
-                alt={post.title}
-                width={1600}
-                height={900}
-                sizes="(max-width: 1024px) 100vw, 960px"
-                className="h-auto w-full object-cover"
-              />
-            </div>
+            <ZoomableImage
+              src={post.coverImage.url}
+              alt={post.title}
+              width={1600}
+              height={900}
+              sizes="(max-width: 1024px) 100vw, 960px"
+              className="rounded-3xl border border-foreground/10 bg-foreground/5"
+              imageClassName="object-cover"
+              priority
+            />
           ) : null}
         </header>
         <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">

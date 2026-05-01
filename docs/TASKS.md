@@ -31,6 +31,14 @@
   - Ensure `HASHNODE_USERNAME` (and optionally `HASHNODE_PUBLICATION_HOST`) env vars are set; no Apollo client needed.
 - **Change blog page size**:
   - Update `pageSize` in `BlogPostsApolloLogger.tsx` and `HomeLatestBlogs.tsx`.
+- **Add tap-to-expand to a new image surface**:
+  - Render `<ZoomableImage>` from `src/components/ZoomableImage.tsx` instead of `<Image>`.
+  - Pass placeholder `width`/`height` for initial aspect; the component overrides aspect from natural dims on load.
+  - For cover-style cropping, pass `imageClassName="object-cover"`; default is `object-contain`.
+  - For above-fold images, pass `priority`.
+- **Tune zoom animation**:
+  - Adjust `DURATION_MS` (default `360`) and `EASING` (default `cubic-bezier(0.32, 0.72, 0, 1)`) in `ZoomableImage.tsx`.
+  - Adjust viewport padding via the `pad` constant in `computeTarget` (mobile `16`, desktop `48`).
 
 ### Upstash Redis (Likes)
 - **Reset likes for a post in Upstash**:

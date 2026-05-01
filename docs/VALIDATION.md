@@ -39,6 +39,17 @@
 - Inline stack metadata wraps cleanly on small screens without overlap.
 - `Current` badge appears only for items with `isCurrent: true`.
 
+### Blog Image Tap-to-Expand
+- Tap an inline blog image — it grows smoothly from its slot to a centered hero with dim backdrop.
+- Tap the expanded image — it collapses smoothly back to its slot.
+- Tap then scroll the page — clone collapses to the source's *new* on-screen position after scroll.
+- Tap then press `Escape` — clone collapses; focus returns to the trigger button.
+- DevTools → Rendering → emulate `prefers-reduced-motion: reduce` — open and close are instant, no transitions, no transform animation.
+- Resize the window while open — clone re-centers without a jump.
+- Cover image expand also works.
+- Tab through the article — each image is focusable; `Enter`/`Space` opens it.
+- Confirm no aspect-ratio distortion: tall/portrait or square images expand at their true ratio (no stretch, no letterbox).
+
 ### Blog Changes
 - First render shows stable count and correct singular/plural label (`Like` vs `Likes`).
 - Slow network still feels responsive (optimistic update), and UI rolls back on failed requests.
@@ -61,7 +72,8 @@
 - No ESLint errors in application code.
 - `src/lib/graphql/generated.ts` is auto-generated and can be ignored.
 - Common lint rules to watch:
-  - No synchronous `setState` in useEffect (use `setTimeout` wrapper).
+  - `react-hooks/set-state-in-effect` — prefer `useSyncExternalStore` for external subscriptions; defer with `setTimeout`/`requestAnimationFrame` if unavoidable.
+  - `react-hooks/refs` — no `ref.current` access during render.
   - No JSX in try/catch blocks (use helper functions).
   - Escape entities properly (use `I{`'`}m` syntax).
   - Use `next/image` instead of `<img>`.

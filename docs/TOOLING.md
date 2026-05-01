@@ -24,7 +24,11 @@
 - Auto-generated GraphQL types (`src/lib/graphql/generated.ts`) are ignored by ESLint.
 
 ## Code Quality Rules
-- **setState in useEffect**: Avoid synchronous `setState` calls in effect bodies. Use `setTimeout(() => setState(...), 0)` for post-mount initialization.
+- **`react-hooks/set-state-in-effect`**: synchronous `setState` in an effect body is an error in this project (React 19). Resolution order:
+  1. Subscribe to external state (matchMedia, storage, etc.) with `useSyncExternalStore`.
+  2. Restructure to avoid the flag entirely — initial state usually solves "is this mounted?" gating.
+  3. Defer with `setTimeout(() => setState(...), 0)` or schedule inside `requestAnimationFrame`. State updates inside those callbacks don't trip the rule.
+- **`react-hooks/refs`**: don't access `ref.current` during render. Promote render-relevant values to `useState`. Refs remain fine for DOM nodes used only in event handlers/effects.
 - **JSX in try/catch**: Don't construct JSX directly inside try/catch. Use helper functions or assign to variables outside the block.
 - **Unescaped entities**: Use template syntax like `I{`'`}m` instead of HTML entities.
 - **Image optimization**: Use `next/image` instead of `<img>` for better performance.

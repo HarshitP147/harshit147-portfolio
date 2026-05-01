@@ -30,6 +30,16 @@
 - Use `loading="lazy"` and `fetchPriority="low"` for below-fold images.
 - SVGs are supported and recommended for icons.
 
+- **`ZoomableImage`** (`src/components/ZoomableImage.tsx`):
+  - Client wrapper around `next/image` (`fill` mode) that adds tap-to-expand.
+  - iOS App Store-style FLIP: source rect → centered hero rect with `transform: translate + scale`, easing `cubic-bezier(0.32, 0.72, 0, 1)` over 360ms.
+  - Phase machine: `idle → opening → open → closing`. Source button gets `visibility: hidden` while not idle so the portaled clone visually replaces it.
+  - Dismiss triggers (only attached during `open`): tap on backdrop or expanded image, `Escape`, `scroll` (passive, capture), `resize` (recomputes target).
+  - No body scroll lock; scroll is a dismiss trigger by design.
+  - Aspect ratio is derived from the loaded image's `naturalWidth / naturalHeight` via `onLoad` — wrapper uses `style={{ aspectRatio }}` to avoid stretching with `<Image fill>`.
+  - `prefers-reduced-motion` honored via `useSyncExternalStore`; transitions disabled when reduced.
+  - Props: `src, alt, width, height, sizes?, className?, imageClassName?, priority?`. `width`/`height` seed the initial aspect before load.
+
 ## Marquee Components
 - **`TechMarquee`** (`src/components/TechMarquee.tsx`):
   - Two-row marquee with opposite directions.
@@ -42,6 +52,11 @@
   - Server component that fetches Hashnode posts.
   - Uses helper functions to avoid JSX in try/catch.
   - Renders `BlogPostCard` components for each post.
+
+- **`BlogPostDetailApolloLogger`** (`src/components/BlogPostDetailApolloLogger.tsx`):
+  - Server component that renders a single Hashnode post.
+  - Cover image and inline markdown images both render through `ZoomableImage`.
+  - The `markdownComponents.img` override returns a `ZoomableImage` instead of a plain `<Image>`.
 
 ## Theme Components
 - **`ThemeToggle`** (`src/components/ThemeToggle.tsx`):
