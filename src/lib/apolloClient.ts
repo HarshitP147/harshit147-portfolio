@@ -2,7 +2,7 @@ import { ApolloLink, HttpLink, Observable, from } from "@apollo/client";
 import { ApolloClient, InMemoryCache } from "@apollo/client-integration-nextjs";
 
 const HASHNODE_GQL_ENDPOINT =
-  process.env.NEXT_PUBLIC_HASHNODE_GQL_ENDPOINT ?? "https://gql.hashnode.com";
+  process.env.NEXT_PUBLIC_HASHNODE_GQL_ENDPOINT ?? "https://gql-beta.hashnode.com";
 const CACHE_KEY = "apollo-cache-v1";
 
 let browserClient: ApolloClient | null = null;
