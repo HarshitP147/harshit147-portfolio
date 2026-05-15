@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 
 import LikeButton from "@/components/LikeButton";
 import ZoomableImage from "@/components/ZoomableImage";
-import { fetchHashnodePostBySlug } from "@/lib/hashnode";
+import { fetchBlogPostBySlug } from "@/lib/blog";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -14,14 +14,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-const HASHNODE_EMBED_PATTERN = /^\s*%\[(https?:\/\/[^\]\s]+)\]\s*$/gm;
-const HASHNODE_IMAGE_WITH_ALIGN_PATTERN =
+const EMBED_PATTERN = /^\s*%\[(https?:\/\/[^\]\s]+)\]\s*$/gm;
+const IMAGE_WITH_ALIGN_PATTERN =
   /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\s+align=(?:"[^"]*"|'[^']*')\)/gm;
-const HASHNODE_IMAGE_SPLIT_LINE_PATTERN =
+const IMAGE_SPLIT_LINE_PATTERN =
   /!\[([^\]]*)\]\s*\n+\s*\((https?:\/\/[^\s)]+)(?:\s+align=(?:"[^"]*"|'[^']*'))?\)/gm;
 
 type BlogPostDetailApolloLoggerProps = {
-  publicationHost: string;
   slug: string;
 };
 
@@ -34,7 +33,7 @@ function getEmbedMarkup(rawUrl: string): string {
       parsedUrl.pathname.startsWith("/embed/")
     ) {
       const src = parsedUrl.toString();
-      return `<div class="hashnode-embed" data-embed-source="codesandbox"><iframe src="${src}" loading="lazy" title="Embedded sandbox" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe></div>`;
+      return `<div class="blog-embed" data-embed-source="codesandbox"><iframe src="${src}" loading="lazy" title="Embedded sandbox" sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe></div>`;
     }
 
     const href = parsedUrl.toString();
@@ -44,18 +43,18 @@ function getEmbedMarkup(rawUrl: string): string {
   }
 }
 
-function transformHashnodeMarkdown(markdown: string): string {
+function transformBlogMarkdown(markdown: string): string {
   const normalizedImages = markdown
     .replace(
-      HASHNODE_IMAGE_WITH_ALIGN_PATTERN,
+      IMAGE_WITH_ALIGN_PATTERN,
       (_match, alt: string, url: string) => `![${alt}](${url})`,
     )
     .replace(
-      HASHNODE_IMAGE_SPLIT_LINE_PATTERN,
+      IMAGE_SPLIT_LINE_PATTERN,
       (_match, alt: string, url: string) => `![${alt}](${url})`,
     );
 
-  return normalizedImages.replace(HASHNODE_EMBED_PATTERN, (_, url: string) =>
+  return normalizedImages.replace(EMBED_PATTERN, (_, url: string) =>
     getEmbedMarkup(url),
   );
 }
@@ -112,13 +111,12 @@ function GoBackLink() {
 }
 
 export default async function BlogPostDetailApolloLogger({
-  publicationHost,
   slug,
 }: BlogPostDetailApolloLoggerProps) {
   let post = null;
 
   try {
-    post = await fetchHashnodePostBySlug({ host: publicationHost, slug });
+    post = await fetchBlogPostBySlug({ slug });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to load the post.";
@@ -140,7 +138,7 @@ export default async function BlogPostDetailApolloLogger({
     ? dateFormatter.format(new Date(post.publishedAt))
     : null;
   const markdownContent = post.content?.markdown
-    ? transformHashnodeMarkdown(post.content.markdown)
+    ? transformBlogMarkdown(post.content.markdown)
     : null;
 
   return (

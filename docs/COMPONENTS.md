@@ -49,12 +49,12 @@
 
 ## Blog Components
 - **`BlogPostsApolloLogger`** (`src/components/BlogPostsApolloLogger.tsx`):
-  - Server component that fetches Hashnode posts.
+  - Server component that fetches posts via `fetchBlogPosts` (Cloudflare D1 + R2).
   - Uses helper functions to avoid JSX in try/catch.
   - Renders `BlogPostCard` components for each post.
 
 - **`BlogPostDetailApolloLogger`** (`src/components/BlogPostDetailApolloLogger.tsx`):
-  - Server component that renders a single Hashnode post.
+  - Server component that renders a single post via `fetchBlogPostBySlug`.
   - Cover image and inline markdown images both render through `ZoomableImage`.
   - The `markdownComponents.img` override returns a `ZoomableImage` instead of a plain `<Image>`.
 

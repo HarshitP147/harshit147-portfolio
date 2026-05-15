@@ -3,8 +3,6 @@
 ## Relevant Skills
 - `next-best-practices`
 - `vercel-react-best-practices`
-- `apollo-client`
-- `hashnode-api`
 
 ## Common Tasks
 
@@ -25,10 +23,14 @@
   - Adjust IntersectionObserver `rootMargin` in `ModelCanvasLazy.tsx` (default: `200px`).
   - Modify poster appearance in `ModelCanvasPoster` component.
 
-### Hashnode Blog Integration
-- **Hashnode blog fetch (server-side)**:
-  - Use `fetchHashnodePosts` in `src/lib/hashnode.ts` for lists and `fetchHashnodePostBySlug` for details.
-  - Ensure `HASHNODE_USERNAME` (and optionally `HASHNODE_PUBLICATION_HOST`) env vars are set; no Apollo client needed.
+### Blog Integration (Cloudflare D1 + R2)
+- **Blog fetch (server-side)**:
+  - Use `fetchBlogPosts` in `src/lib/blog.ts` for lists and `fetchBlogPostBySlug` for details.
+  - Requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_D1_DATABASE_ID`, `R2_PUBLIC_BASE_URL`.
+- **Publish / update a blog post**:
+  - Draft + publish on Hashnode, stage the export at `tmp/<slug>/` (`index.md`, `meta.json`, `cover.*`, numbered images), then `npm run publish:blog -- <slug>`.
+  - Idempotent: re-running after an edit upserts the same `posts` row by slug; the post `id` (and its likes) stay stable. Read time auto-computed.
+  - See ARCHITECTURE.md "Publishing Blogs" for the full `meta.json` shape.
 - **Change blog page size**:
   - Update `pageSize` in `BlogPostsApolloLogger.tsx` and `HomeLatestBlogs.tsx`.
 - **Add tap-to-expand to a new image surface**:

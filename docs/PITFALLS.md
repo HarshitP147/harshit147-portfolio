@@ -63,8 +63,8 @@
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
 
 ### Blog Integration
-- Homepage "My Blogs" uses `HomeLatestBlogs` (server-rendered) and shows "Read more" only when `hasNextPage` from `fetchHashnodePosts`.
-- Blog list and post detail (`/blog`, `/blog/[slug]`) are server-rendered via `fetchHashnodePosts`/`fetchHashnodePostBySlug`; set `HASHNODE_USERNAME` (and optionally `HASHNODE_PUBLICATION_HOST`) in env.
+- Homepage "My Blogs" uses `HomeLatestBlogs` (server-rendered) and shows "Read more" only when `hasNextPage` from `fetchBlogPosts`.
+- Blog list and post detail (`/blog`, `/blog/[slug]`) are server-rendered via `fetchBlogPosts`/`fetchBlogPostBySlug` (Cloudflare D1 + R2); set the `CLOUDFLARE_*` and `R2_PUBLIC_BASE_URL` env vars.
 - Homepage "Projects" uses `HomeFeaturedProjects` with local typed data from `src/lib/featuredProjects.ts`.
 - Projects stack presentation is inline metadata separated by dots (`•`) instead of pill badges.
 - Projects GitHub actions use `lucide-react` `Github` icon and shared blue hover/focus color with text.

@@ -8,7 +8,6 @@ This file lists the agent skills available for this codebase and how to install 
 - `find-skills`: Discover and install skills when the user asks for new capabilities.
 - `apollo-client`: Guide for building React applications with Apollo Client 4.x.
 - `apollo-mcp-server`: Guide for using Apollo MCP Server to connect AI agents with GraphQL APIs.
-- `hashnode-api`: Hashnode GraphQL API documentation for blog data.
 - `next-best-practices`: Next.js best practices for App Router, data patterns, and optimization.
 - `vercel-react-best-practices`: React/Next.js performance optimization guidelines.
 - `shadcn`: Manage shadcn/ui components and registries.

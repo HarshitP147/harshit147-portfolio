@@ -9,11 +9,6 @@ import { sectionShellClassName, sectionTitleClassName } from "@/components/secti
 
 
 export default async function Home() {
-  const username =
-    process.env.HASHNODE_USERNAME ??
-    process.env.NEXT_PUBLIC_HASHNODE_USERNAME ??
-    null;
-
   return (
     <div className="min-h-screen bg-background font-sans text-primary-foreground">
       <div className={sectionShellClassName()}>
@@ -43,15 +38,9 @@ export default async function Home() {
         </main>
         <TechMarquee />
         <section className="pb-10 text-foreground">
-          {username ? (
-            <Suspense fallback={<HomeLatestBlogsSkeleton />}>
-              <HomeLatestBlogs username={username} />
-            </Suspense>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Set `HASHNODE_USERNAME` (or `NEXT_PUBLIC_HASHNODE_USERNAME`) to load posts.
-            </p>
-          )}
+          <Suspense fallback={<HomeLatestBlogsSkeleton />}>
+            <HomeLatestBlogs />
+          </Suspense>
         </section>
         <HomeFeaturedProjects />
         <HomePersonalLinks />

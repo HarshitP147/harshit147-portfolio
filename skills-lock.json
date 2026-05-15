@@ -21,11 +21,6 @@
       "sourceType": "github",
       "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
     },
-    "hashnode-api": {
-      "source": "rawveg/skillsforge-marketplace",
-      "sourceType": "github",
-      "computedHash": "56ce1ebc2a06f23bd3cfdd199a473eca864f72cdb1d73b70959527aa83477036"
-    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",

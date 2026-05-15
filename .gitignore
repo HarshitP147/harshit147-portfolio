@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# transient blog staging (canonical lives in Cloudflare R2/D1)
+/tmp
+
 .codex/
 .mcp/
 .vscode/

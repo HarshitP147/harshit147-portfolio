@@ -17,11 +17,6 @@ export type LikeEntry = {
   likedAt: string;
 };
 
-export type PostLikesDocument = {
-  slug: string;
-  likes: LikeEntry[];
-};
-
 export type LikeMutationRequest = {
   slug: string;
 };
@@ -31,7 +26,3 @@ export type LikeResponse = {
   likes: number;
   liked: boolean;
 };
-
-export function getPostLikesKey(postId: string) {
-  return `likes:post:${postId}`;
-}

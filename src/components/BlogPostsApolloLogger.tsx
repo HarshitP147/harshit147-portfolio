@@ -1,12 +1,8 @@
 import { BlogPostCard } from "@/components/BlogPostCard";
-import { fetchHashnodePosts } from "@/lib/hashnode";
+import { fetchBlogPosts } from "@/lib/blog";
 
-type BlogPostsApolloLoggerProps = {
-  username: string;
-};
-
-async function loadPosts(username: string, pageSize: number) {
-  const { posts } = await fetchHashnodePosts({ first: pageSize, username });
+async function loadPosts(pageSize: number) {
+  const { posts } = await fetchBlogPosts({ first: pageSize });
   return posts.filter((post) => Boolean(post.id && post.slug));
 }
 
@@ -38,16 +34,14 @@ function renderError(error: unknown) {
   return <p className="text-sm text-muted-foreground">{message}</p>;
 }
 
-export default async function BlogPostsApolloLogger({
-  username,
-}: BlogPostsApolloLoggerProps) {
+export default async function BlogPostsApolloLogger() {
   const pageSize = 3;
 
   let posts: Awaited<ReturnType<typeof loadPosts>> | null = null;
   let error: unknown = null;
 
   try {
-    posts = await loadPosts(username, pageSize);
+    posts = await loadPosts(pageSize);
   } catch (e) {
     error = e;
   }

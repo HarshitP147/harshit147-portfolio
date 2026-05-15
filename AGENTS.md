@@ -45,5 +45,5 @@ This file is a lookup map. The detailed, authoritative documentation lives under
 - Next.js App Router with TypeScript
 - Tailwind CSS for styling
 - @react-three/fiber for 3D
-- Server-side Hashnode integration (no Apollo client on blog pages)
+- Server-side blog data from Cloudflare D1 + R2 (no client data fetching on blog pages)
 - CSS-only animations (no framer-motion)

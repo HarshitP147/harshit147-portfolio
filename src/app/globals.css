@@ -395,7 +395,7 @@
   margin-bottom: 0;
 }
 
-.blog-markdown .hashnode-embed {
+.blog-markdown .blog-embed {
   margin: 1.75rem 0;
   overflow: hidden;
   border-radius: 1rem;
@@ -403,7 +403,7 @@
   background: var(--card);
 }
 
-.blog-markdown .hashnode-embed iframe {
+.blog-markdown .blog-embed iframe {
   display: block;
   width: 100%;
   min-height: 440px;
@@ -412,7 +412,7 @@
 }
 
 @media (max-width: 768px) {
-  .blog-markdown .hashnode-embed iframe {
+  .blog-markdown .blog-embed iframe {
     min-height: 320px;
   }
 }

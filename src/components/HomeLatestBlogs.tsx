@@ -2,11 +2,7 @@ import Link from "next/link";
 
 import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import { sectionTitleClassName } from "@/components/sectionStyles";
-import { fetchHashnodePosts } from "@/lib/hashnode";
-
-type HomeLatestBlogsProps = {
-  username: string;
-};
+import { fetchBlogPosts } from "@/lib/blog";
 
 export function HomeLatestBlogsSkeleton() {
   return (
@@ -23,12 +19,12 @@ export function HomeLatestBlogsSkeleton() {
   );
 }
 
-export default async function HomeLatestBlogs({ username }: HomeLatestBlogsProps) {
-  let posts: Awaited<ReturnType<typeof fetchHashnodePosts>>["posts"] = [];
+export default async function HomeLatestBlogs() {
+  let posts: Awaited<ReturnType<typeof fetchBlogPosts>>["posts"] = [];
   let hasMore = false;
 
   try {
-    const result = await fetchHashnodePosts({ first: 3, username });
+    const result = await fetchBlogPosts({ first: 3 });
     posts = result.posts.filter((post) => Boolean(post.id && post.slug));
     hasMore = result.hasNextPage;
   } catch (error) {

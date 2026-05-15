@@ -1,17 +1,20 @@
 import type { NextConfig } from "next";
 
+const r2Host = (() => {
+  try {
+    return process.env.R2_PUBLIC_BASE_URL
+      ? new URL(process.env.R2_PUBLIC_BASE_URL).hostname
+      : null;
+  } catch {
+    return null;
+  }
+})();
+
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.hashnode.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.hashnode.com",
-      },
-    ],
+    remotePatterns: r2Host
+      ? [{ protocol: "https", hostname: r2Host }]
+      : [],
   },
   turbopack: {
     rules: {
