@@ -14,12 +14,17 @@ export type FeaturedProject = {
 
 export const featuredProjects: FeaturedProject[] = [
   {
-    title: "SuperScaler AI",
+    title: "Superscaler AI",
     domain: "AI Platform",
     description:
       "An AI platform that upscales images and videos to higher resolutions with AI.",
-    stack: ["Next.js", "Supabase", "Daisy UI", "Fal AI"],
-    links: [],
+    stack: ["Next.js", "Supabase", "Daisy UI", "Stripe"],
+    links: [
+      {
+        "label":"GitHub",
+        "href":"https://github.com/HarshitP147/superscaler-ai"
+      }
+    ],
     isCurrent: true,
   },
   {
@@ -31,8 +36,7 @@ export const featuredProjects: FeaturedProject[] = [
       "Next.js",
       "Shadcn UI",
       "Three.js",
-      "Apollo Client",
-      "Redis",
+      "Cloudflare (R2 and D1)"
     ],
     links: [
       {

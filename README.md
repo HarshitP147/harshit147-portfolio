@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Portfolio
+This is the codebase for my personal portfolio website. The site is deployed on Vercel and blogs are hosted on Cloudflare.
 
-## Getting Started
+Earlier the blogs were written and hosted on Hashnode and the site would utilize Hashnode's GraphQL API endpoints to retrieve the blogs.
+As of 13th May 2026, their API started moving to paid offering.
 
-First, run the development server:
+On 16th May 2026, all the blogs were migrated and hosted on Cloudflare services, more specifically R2 storage for markdown and images and D1 database for blog metadata and blog likes storage.
 
-```bash
+Now each blog is written in Hashnode, downloaded to `tmp/` folder and the migration script is being executed to push the blog to Cloudflare.
+
+The tech stack:
+- Next.js
+- Typescript
+- ShadCN/UI
+- TailwindCSS
+- Cloudflare Typescript SDK
+- Vercel tools (Analytics and Speed insights)
+
+To run locally:
+```sh
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Agents
+The site is designed and engineered with coding agents. All the relevant skills are commited with this project.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Any agent specific settings such as MCP servers are not commited with this project.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The project also contains knowledge base in the `docs/` folder. Each knowledge base contain the design, architecture and other important information about the codebase and the project in separate files and folders.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The site is deployed on [harshit147.dev](https://harshit147.dev).
