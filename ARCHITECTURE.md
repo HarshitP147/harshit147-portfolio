@@ -41,7 +41,7 @@
 
 ## Blog Integration (Cloudflare D1 + R2)
 - `src/lib/blog.ts` exposes `fetchBlogPosts()` and `fetchBlogPostBySlug({ slug })`; blog pages/components are server-rendered and call these directly (no client data fetching).
-- Post metadata lives in the D1 `posts` table (`id`, `slug`, `title`, `brief`, `published_at`, `date_modified`, `read_time_minutes`, `cover_image_key`, `content_key`).
+- Post metadata lives in the D1 `posts` table (`id`, `slug`, `title`, `published_at`, `date_modified`, `read_time_minutes`, `cover_image_key`, `content_key`).
 - Markdown body + images live in R2 under `<slug>/index.md` and `<slug>/images/*`; image URLs in markdown are absolute R2 URLs.
 - Blog content renders Markdown via `react-markdown` + `remark-gfm` + `rehype-raw`.
 - `transformBlogMarkdown` normalizes `align="..."` image syntax and converts `%[url]` embeds into iframes (e.g. CodeSandbox).
@@ -57,7 +57,7 @@ Workflow:
 1. Draft + publish on Hashnode (free editor).
 2. Stage the export at `tmp/<slug>/` (gitignored, transient):
    - `index.md` — Hashnode markdown export
-   - `meta.json` — `{ "title": "...", "brief": "", "publishedAt": "<ISO>" }` (optional `dateModified`, `readTimeInMinutes`)
+   - `meta.json` — `{ "title": "...", "publishedAt": "<date>" }` (optional `dateModified`, `readTimeInMinutes`). `publishedAt`/`dateModified` accept ISO or Hashnode's human format `"Monday, June 8, 2026 at 01:57 AM"`; script normalizes to ISO in the host's local timezone.
    - `cover.<ext>` — optional; otherwise the single numbered image is the cover
    - `one.<ext>`, `two.<ext>`, … — inline images in order of appearance
 3. `npm run publish:blog -- <slug>`

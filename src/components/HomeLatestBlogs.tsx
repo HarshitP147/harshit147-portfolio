@@ -63,7 +63,6 @@ export default async function HomeLatestBlogs() {
             id={post.id}
             title={post.title}
             slug={post.slug}
-            brief={post.brief}
             coverImageUrl={post.coverImage?.url ?? null}
             publishedAt={post.publishedAt ?? null}
             readTimeInMinutes={post.readTimeInMinutes ?? null}

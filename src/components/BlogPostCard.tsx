@@ -13,7 +13,6 @@ type BlogPostCardProps = {
   id: string;
   title: string;
   slug: string;
-  brief?: string | null;
   coverImageUrl?: string | null;
   publishedAt?: string | null;
   readTimeInMinutes?: number | null;

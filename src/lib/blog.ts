@@ -6,7 +6,6 @@ import Cloudflare from "cloudflare";
 type BlogPost = {
   id: string;
   title: string;
-  brief: string;
   url: string;
   slug: string;
   publishedAt: string;
@@ -28,7 +27,6 @@ type PostRow = {
   id: string;
   slug: string;
   title: string;
-  brief: string;
   published_at: string;
   date_modified: string;
   read_time_minutes: number;
@@ -83,7 +81,6 @@ function rowToSummary(row: PostRow): BlogPost {
   return {
     id: row.id,
     title: row.title,
-    brief: row.brief,
     url: `/blog/${row.slug}`,
     slug: row.slug,
     publishedAt: row.published_at,
@@ -104,7 +101,7 @@ export async function fetchBlogPosts({
   hasNextPage: boolean;
 }> {
   const rows = await queryD1<PostRow>(
-    "SELECT id, slug, title, brief, published_at, date_modified, read_time_minutes, cover_image_key, content_key FROM posts ORDER BY published_at DESC LIMIT ?",
+    "SELECT id, slug, title, published_at, date_modified, read_time_minutes, cover_image_key, content_key FROM posts ORDER BY published_at DESC LIMIT ?",
     [String(first + 1)],
   );
 
@@ -120,7 +117,7 @@ export async function fetchBlogPostBySlug({
   slug: string;
 }): Promise<BlogPostDetail | null> {
   const rows = await queryD1<PostRow>(
-    "SELECT id, slug, title, brief, published_at, date_modified, read_time_minutes, cover_image_key, content_key FROM posts WHERE slug = ? LIMIT 1",
+    "SELECT id, slug, title, published_at, date_modified, read_time_minutes, cover_image_key, content_key FROM posts WHERE slug = ? LIMIT 1",
     [slug],
   );
 

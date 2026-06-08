@@ -19,7 +19,6 @@ function renderPosts(posts: ReturnType<typeof loadPosts> extends Promise<infer T
           id={post.id}
           title={post.title}
           slug={post.slug}
-          brief={post.brief}
           coverImageUrl={post.coverImage?.url ?? null}
           publishedAt={post.publishedAt ?? null}
           readTimeInMinutes={post.readTimeInMinutes ?? null}
@@ -35,7 +34,7 @@ function renderError(error: unknown) {
 }
 
 export default async function BlogPostsApolloLogger() {
-  const pageSize = 3;
+  const pageSize = 12;
 
   let posts: Awaited<ReturnType<typeof loadPosts>> | null = null;
   let error: unknown = null;

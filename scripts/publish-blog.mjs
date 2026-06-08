@@ -4,7 +4,7 @@
 //   1. Draft + publish on Hashnode (free editor).
 //   2. Put the export at  tmp/<slug>/
 //        index.md            (Hashnode markdown export)
-//        meta.json           ({ "title": "...", "brief": "", "publishedAt": "ISO" })
+//        meta.json           ({ "title": "...", "publishedAt": "ISO" })
 //        cover.<ext>          (optional; else the single numbered image is cover)
 //        one.<ext>, two.<ext> ... numbered inline images, in order of appearance
 //   3. npm run publish:blog -- <slug>
@@ -117,6 +117,20 @@ function computeReadTime(markdown) {
   return Math.max(1, Math.round(words / 200));
 }
 
+// Accepts either an ISO string or Hashnode's human format
+//   "Monday, June 8, 2026 at 01:57 AM"
+// Returns an ISO string (parsed in the host's local timezone).
+function toIsoDate(input) {
+  const s = String(input).trim();
+  if (!Number.isNaN(Date.parse(s))) return new Date(s).toISOString();
+  const cleaned = s.replace(/\s+at\s+/i, " ");
+  const d = new Date(cleaned);
+  if (Number.isNaN(d.getTime())) {
+    throw new Error(`Cannot parse date: ${input}`);
+  }
+  return d.toISOString();
+}
+
 async function main() {
   const dir = join("tmp", slug);
   if (!existsSync(join(dir, "index.md"))) {
@@ -125,7 +139,7 @@ async function main() {
   }
   if (!existsSync(join(dir, "meta.json"))) {
     console.error(
-      `Missing ${dir}/meta.json  -> { "title": "...", "brief": "", "publishedAt": "ISO" }`,
+      `Missing ${dir}/meta.json  -> { "title": "...", "publishedAt": "ISO" }`,
     );
     process.exit(1);
   }
@@ -156,7 +170,6 @@ async function main() {
        id TEXT PRIMARY KEY,
        slug TEXT UNIQUE NOT NULL,
        title TEXT NOT NULL,
-       brief TEXT NOT NULL,
        published_at TEXT NOT NULL,
        date_modified TEXT NOT NULL,
        read_time_minutes INTEGER NOT NULL,
@@ -197,13 +210,17 @@ async function main() {
   await putR2(contentKey, markdown, "index.md");
 
   const readTime = meta.readTimeInMinutes || computeReadTime(markdown);
+  const publishedAt = toIsoDate(meta.publishedAt);
+  const dateModified = meta.dateModified
+    ? toIsoDate(meta.dateModified)
+    : publishedAt;
 
   await d1(
     `INSERT INTO posts
-       (id, slug, title, brief, published_at, date_modified, read_time_minutes, cover_image_key, content_key)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (id, slug, title, published_at, date_modified, read_time_minutes, cover_image_key, content_key)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET
-       title=excluded.title, brief=excluded.brief,
+       title=excluded.title,
        published_at=excluded.published_at, date_modified=excluded.date_modified,
        read_time_minutes=excluded.read_time_minutes,
        cover_image_key=excluded.cover_image_key, content_key=excluded.content_key`,
@@ -211,9 +228,8 @@ async function main() {
       id,
       slug,
       meta.title,
-      meta.brief ?? "",
-      meta.publishedAt,
-      meta.dateModified ?? meta.publishedAt,
+      publishedAt,
+      dateModified,
       readTime,
       coverKey,
       contentKey,
