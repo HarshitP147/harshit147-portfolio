@@ -2,6 +2,8 @@ import BackToHomeLink from "@/components/BackToHomeLink";
 
 import BlogPostsApolloLogger from "@/components/BlogPostsApolloLogger";
 
+export const revalidate = 3600;
+
 export default async function BlogPage() {
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 pb-28 pt-20 text-foreground">

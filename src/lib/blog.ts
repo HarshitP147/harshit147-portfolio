@@ -1,7 +1,11 @@
+import { unstable_cache } from "next/cache";
 import Cloudflare from "cloudflare";
 
 // Blog data layer — reads metadata from Cloudflare D1 and markdown/images
 // from Cloudflare R2.
+
+export const BLOG_LIST_TAG = "blog:list";
+export const blogPostTag = (slug: string) => `blog:post:${slug}`;
 
 type BlogPost = {
   id: string;
@@ -40,6 +44,8 @@ const CLOUDFLARE_D1_DATABASE_ID = process.env.CLOUDFLARE_D1_DATABASE_ID;
 const R2_PUBLIC_BASE_URL = process.env.R2_PUBLIC_BASE_URL;
 
 const REVALIDATE_SECONDS = 600;
+const LIST_REVALIDATE_SECONDS = 3600;
+const POST_REVALIDATE_SECONDS = 3600;
 
 function getClient(): Cloudflare {
   if (!CLOUDFLARE_API_TOKEN) {
@@ -91,7 +97,7 @@ function rowToSummary(row: PostRow): BlogPost {
   };
 }
 
-export async function fetchBlogPosts({
+async function fetchBlogPostsUncached({
   first = 20,
 }: {
   first?: number;
@@ -111,7 +117,13 @@ export async function fetchBlogPosts({
   return { authorName: null, posts, hasNextPage };
 }
 
-export async function fetchBlogPostBySlug({
+export const fetchBlogPosts = unstable_cache(
+  fetchBlogPostsUncached,
+  ["blog:list"],
+  { revalidate: LIST_REVALIDATE_SECONDS, tags: [BLOG_LIST_TAG] },
+);
+
+async function fetchBlogPostBySlugUncached({
   slug,
 }: {
   slug: string;
@@ -127,7 +139,10 @@ export async function fetchBlogPostBySlug({
   }
 
   const markdownResponse = await fetch(r2Url(row.content_key), {
-    next: { revalidate: REVALIDATE_SECONDS },
+    next: {
+      revalidate: REVALIDATE_SECONDS,
+      tags: [blogPostTag(slug)],
+    },
   });
 
   if (!markdownResponse.ok) {
@@ -142,4 +157,20 @@ export async function fetchBlogPostBySlug({
     ...rowToSummary(row),
     content: { markdown },
   };
+}
+
+export async function fetchBlogPostBySlug({
+  slug,
+}: {
+  slug: string;
+}): Promise<BlogPostDetail | null> {
+  const cached = unstable_cache(
+    () => fetchBlogPostBySlugUncached({ slug }),
+    ["blog:post", slug],
+    {
+      revalidate: POST_REVALIDATE_SECONDS,
+      tags: [blogPostTag(slug), BLOG_LIST_TAG],
+    },
+  );
+  return cached();
 }

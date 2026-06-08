@@ -1,4 +1,17 @@
 import BlogPostDetailApolloLogger from "@/components/BlogPostDetailApolloLogger";
+import { fetchBlogPosts } from "@/lib/blog";
+
+export const revalidate = 3600;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  try {
+    const { posts } = await fetchBlogPosts({ first: 50 });
+    return posts.map((post) => ({ slug: post.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export default async function BlogPostPage({
   params,

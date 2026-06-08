@@ -239,6 +239,41 @@ async function main() {
   console.log(
     `\nPublished "${slug}" (id ${id}, ${readTime} min read, ${inlineImages.length} inline images).`,
   );
+
+  await revalidateBlogCache(slug);
+}
+
+async function revalidateBlogCache(postSlug) {
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  const secret = process.env.BLOG_REVALIDATE_SECRET;
+
+  if (!siteUrl || !secret) {
+    console.log(
+      "Skipping cache revalidation (set SITE_URL and BLOG_REVALIDATE_SECRET to enable).",
+    );
+    return;
+  }
+
+  const endpoint = `${siteUrl.replace(/\/+$/, "")}/api/revalidate`;
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-revalidate-secret": secret,
+      },
+      body: JSON.stringify({ slug: postSlug }),
+    });
+    if (!res.ok) {
+      console.warn(
+        `Revalidation request returned ${res.status}: ${await res.text()}`,
+      );
+      return;
+    }
+    console.log(`Revalidated cache for /blog and /blog/${postSlug}.`);
+  } catch (err) {
+    console.warn(`Revalidation request failed: ${err?.message ?? err}`);
+  }
 }
 
 main().catch((e) => {
