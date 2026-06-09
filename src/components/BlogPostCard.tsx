@@ -37,7 +37,7 @@ export function BlogPostCard({
     <Link href={`/blog/${slug}`} className={cn("block w-full", className)}>
       <Card
         className={cn(
-          "group/card relative h-full w-full gap-3 overflow-hidden border border-foreground/5 bg-card/80 py-0 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/10",
+          "group/card relative h-full w-full gap-3 overflow-hidden bg-card/80 py-0 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/10",
           size === "compact" ? "rounded-2xl" : "rounded-3xl",
         )}
       >
@@ -104,7 +104,7 @@ export function BlogPostCardSkeleton({ size = "default" }: BlogPostCardSkeletonP
   return (
     <Card
       className={cn(
-        "overflow-hidden border border-foreground/5 bg-foreground/5 py-0",
+        "overflow-hidden bg-foreground/5 py-0",
         size === "compact" ? "rounded-2xl" : "rounded-3xl",
       )}
     >
