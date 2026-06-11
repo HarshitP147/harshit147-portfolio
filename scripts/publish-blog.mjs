@@ -16,6 +16,10 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { extname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 
+// Native fetch instead of the SDK's bundled node-fetch@2 (avoids DEP0169
+// url.parse() deprecation warnings). Must be imported before "cloudflare".
+import "cloudflare/shims/web";
+
 import Cloudflare from "cloudflare";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 

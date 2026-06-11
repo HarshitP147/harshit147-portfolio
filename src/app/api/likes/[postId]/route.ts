@@ -1,3 +1,7 @@
+// Native fetch instead of bundled node-fetch@2 (avoids DEP0169 url.parse()
+// deprecation warnings). Must be imported before "cloudflare".
+import "cloudflare/shims/web";
+
 import Cloudflare from "cloudflare";
 import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";

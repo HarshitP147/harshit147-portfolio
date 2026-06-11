@@ -1,3 +1,8 @@
+// Use the platform's native fetch instead of the SDK's bundled node-fetch@2,
+// whose internals call the deprecated url.parse() (DEP0169 warnings in logs).
+// Must be imported before "cloudflare".
+import "cloudflare/shims/web";
+
 import { unstable_cache } from "next/cache";
 import Cloudflare from "cloudflare";
 
