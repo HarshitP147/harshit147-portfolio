@@ -28,9 +28,10 @@ export default async function HomeLatestBlogs() {
     posts = result.posts.filter((post) => Boolean(post.id && post.slug));
     hasMore = result.hasNextPage;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to load posts.";
-    return <p className="text-sm text-muted-foreground">{message}</p>;
+    console.error("[blog] Failed to load latest posts:", error);
+    return (
+      <p className="text-sm text-muted-foreground">Unable to load posts.</p>
+    );
   }
 
   if (posts.length === 0) {

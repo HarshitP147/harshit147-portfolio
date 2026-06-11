@@ -47,11 +47,13 @@ const REVALIDATE_SECONDS = 600;
 const LIST_REVALIDATE_SECONDS = 3600;
 const POST_REVALIDATE_SECONDS = 3600;
 
+let cachedClient: Cloudflare | null = null;
 function getClient(): Cloudflare {
   if (!CLOUDFLARE_API_TOKEN) {
     throw new Error("Missing CLOUDFLARE_API_TOKEN");
   }
-  return new Cloudflare({ apiToken: CLOUDFLARE_API_TOKEN });
+  cachedClient ??= new Cloudflare({ apiToken: CLOUDFLARE_API_TOKEN });
+  return cachedClient;
 }
 
 function r2Url(key: string): string {

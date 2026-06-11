@@ -218,10 +218,6 @@
     Helvetica, Arial, sans-serif;
 }
 
-.font-inter {
-  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
-}
-
 @keyframes marquee-left {
   from {
     transform: translateX(0);

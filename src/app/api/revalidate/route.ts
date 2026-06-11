@@ -1,9 +1,20 @@
+import { timingSafeEqual } from "node:crypto";
+
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { BLOG_LIST_TAG, blogPostTag } from "@/lib/blog";
 
 export const runtime = "nodejs";
+
+function secretsMatch(provided: string, secret: string): boolean {
+  const providedBuffer = Buffer.from(provided);
+  const secretBuffer = Buffer.from(secret);
+  if (providedBuffer.length !== secretBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(providedBuffer, secretBuffer);
+}
 
 export async function POST(request: Request) {
   const secret = process.env.BLOG_REVALIDATE_SECRET;
@@ -15,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const provided = request.headers.get("x-revalidate-secret");
-  if (provided !== secret) {
+  if (!provided || !secretsMatch(provided, secret)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 

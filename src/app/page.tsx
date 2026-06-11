@@ -19,7 +19,7 @@ export default async function Home() {
                 Hi, I{`'`}m
               </p>
               <h1 className="max-w-[12em] text-4xl font-semibold tracking-[0.03em] sm:max-w-none sm:text-7xl sm:font-light xl:text-8xl">
-                <NameGradient className="font-geist" />
+                <NameGradient />
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">

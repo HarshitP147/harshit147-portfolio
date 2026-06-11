@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Outfit } from "next/font/google";
+import { Geist_Mono, Outfit } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
@@ -10,18 +10,8 @@ import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -46,9 +36,7 @@ export default async function RootLayout({
       className={`${outfit.variable}${initialTheme ? ` ${initialTheme}` : ""}`}
       suppressHydrationWarning
     >
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
-      >
+      <body className={`${geistMono.variable} antialiased`}>
         <Script id="theme-init" strategy="beforeInteractive">{`
           (function() {
             try {

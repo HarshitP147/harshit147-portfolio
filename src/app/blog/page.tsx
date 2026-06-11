@@ -27,6 +27,9 @@ export default async function BlogPage() {
         </span>
         <span className="h-px flex-1 bg-border/70" />
       </div>
+      <p className="text-center text-[11px] text-muted-foreground/70">
+        Anonymous usage data is collected for analytics.
+      </p>
     </section>
   );
 }

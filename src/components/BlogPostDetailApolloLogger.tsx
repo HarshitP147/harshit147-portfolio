@@ -118,9 +118,10 @@ export default async function BlogPostDetailApolloLogger({
   try {
     post = await fetchBlogPostBySlug({ slug });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unable to load the post.";
-    return <p className="text-sm text-muted-foreground">{message}</p>;
+    console.error(`[blog] Failed to load post "${slug}":`, error);
+    return (
+      <p className="text-sm text-muted-foreground">Unable to load the post.</p>
+    );
   }
 
   if (!post || post.slug !== slug) {

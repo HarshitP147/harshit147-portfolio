@@ -33,6 +33,11 @@ const UNKNOWN_GEO_VALUE = "unknown";
 const BOT_USER_AGENT_PATTERN =
   /bot|crawler|spider|slurp|bingpreview|headless/i;
 
+// postId is either a UUID or a slug; reject anything outside that shape so
+// arbitrary junk can't be written into D1.
+const POST_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+const MAX_SLUG_LENGTH = 128;
+
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
 const CLOUDFLARE_D1_DATABASE_ID = process.env.CLOUDFLARE_D1_DATABASE_ID;
 
@@ -195,12 +200,35 @@ function createJsonResponse(
 }
 
 function createErrorResponse(
-  payload: ErrorPayload,
+  postId: string,
+  error: unknown,
   visitorContext: VisitorContext,
 ) {
+  // Log the real error server-side; never leak internals to the client.
+  console.error(`[likes] ${postId}:`, error);
   return applyVisitorCookie(
-    NextResponse.json(payload, { status: 500 }),
+    NextResponse.json(
+      {
+        postId,
+        likes: 0,
+        liked: false,
+        error: "Unable to process the request",
+      } satisfies ErrorPayload,
+      { status: 500 },
+    ),
     visitorContext,
+  );
+}
+
+function createBadRequestResponse(postId: string) {
+  return NextResponse.json(
+    {
+      postId,
+      likes: 0,
+      liked: false,
+      error: "Invalid request",
+    } satisfies ErrorPayload,
+    { status: 400 },
   );
 }
 
@@ -254,6 +282,9 @@ async function readLikeState(
 
 export async function GET(_: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  if (!POST_ID_PATTERN.test(postId)) {
+    return createBadRequestResponse(postId.slice(0, 64));
+  }
   const visitorContext = await getVisitorContext();
 
   try {
@@ -262,25 +293,32 @@ export async function GET(_: NextRequest, { params }: RouteParams) {
       visitorContext,
     );
   } catch (error) {
-    return createErrorResponse(
-      {
-        postId,
-        likes: 0,
-        liked: false,
-        error: (error as Error).message,
-      },
-      visitorContext,
-    );
+    return createErrorResponse(postId, error, visitorContext);
   }
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  if (!POST_ID_PATTERN.test(postId)) {
+    return createBadRequestResponse(postId.slice(0, 64));
+  }
   const visitorContext = await getVisitorContext();
 
   try {
     const payload = await getMutationPayload(request);
+    if (payload.slug && payload.slug.length > MAX_SLUG_LENGTH) {
+      return createBadRequestResponse(postId);
+    }
     const entry = await getLikeEntry();
+
+    // Don't persist likes from self-identified bots/crawlers; return the
+    // current state instead of writing a row.
+    if (entry.deviceType === "bot") {
+      return createJsonResponse(
+        await readLikeState(postId, visitorContext.visitorId),
+        visitorContext,
+      );
+    }
 
     await d1(
       `INSERT INTO post_likes
@@ -329,20 +367,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       visitorContext,
     );
   } catch (error) {
-    return createErrorResponse(
-      {
-        postId,
-        likes: 0,
-        liked: false,
-        error: (error as Error).message,
-      },
-      visitorContext,
-    );
+    return createErrorResponse(postId, error, visitorContext);
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  if (!POST_ID_PATTERN.test(postId)) {
+    return createBadRequestResponse(postId.slice(0, 64));
+  }
   const visitorContext = await getVisitorContext();
 
   try {
@@ -356,14 +389,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       visitorContext,
     );
   } catch (error) {
-    return createErrorResponse(
-      {
-        postId,
-        likes: 0,
-        liked: false,
-        error: (error as Error).message,
-      },
-      visitorContext,
-    );
+    return createErrorResponse(postId, error, visitorContext);
   }
 }
