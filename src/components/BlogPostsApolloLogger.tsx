@@ -29,8 +29,8 @@ function renderPosts(posts: ReturnType<typeof loadPosts> extends Promise<infer T
 }
 
 function renderError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Unable to load posts.";
-  return <p className="text-sm text-muted-foreground">{message}</p>;
+  console.error("[blog] Failed to load posts:", error);
+  return <p className="text-sm text-muted-foreground">Unable to load posts.</p>;
 }
 
 export default async function BlogPostsApolloLogger() {

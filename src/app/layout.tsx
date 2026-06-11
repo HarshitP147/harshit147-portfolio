@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://harshit147.dev"),
   title: "Harshit Pandit",
   description: "Software Engineer with a passion for building scalable and efficient applications. Experienced in full-stack development, cloud computing, and DevOps practices. Always eager to learn new technologies and improve my skills.",
 };

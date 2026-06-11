@@ -118,7 +118,9 @@ function Scene({
 
   return (
     <>
-      <hemisphereLight intensity={isMobile ? 2.0 : 3.5} position={[0, 10, 0]} castShadow />
+      {/* hemisphereLight cannot cast shadows — adding castShadow only triggers
+          THREE.WebGLShadowMap "has no shadow" console warnings */}
+      <hemisphereLight intensity={isMobile ? 2.0 : 3.5} position={[0, 10, 0]} />
       <directionalLight
         position={[0, 4.4, 3]}
         intensity={isMobile ? 3 : 5}
