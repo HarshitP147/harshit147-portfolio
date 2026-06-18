@@ -1,10 +1,12 @@
 import { Clock3 } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
 import LikeButton from "@/components/LikeButton";
+import TableOfContents, { type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { fetchBlogPostBySlug } from "@/lib/blog";
 
@@ -59,6 +61,55 @@ function transformBlogMarkdown(markdown: string): string {
   );
 }
 
+function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+function hastToText(node: unknown): string {
+  if (!node || typeof node !== "object") return "";
+  const n = node as { type?: string; value?: string; children?: unknown[] };
+  if (n.type === "text" && typeof n.value === "string") return n.value;
+  if (Array.isArray(n.children)) return n.children.map(hastToText).join("");
+  return "";
+}
+
+function parseHeadings(markdown: string): TocHeading[] {
+  const headings: TocHeading[] = [];
+  let inCodeBlock = false;
+  for (const line of markdown.split("\n")) {
+    if (line.trimStart().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+    const match = line.match(/^(#{1,6})\s+(.+)$/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].replace(/[*_`~[\]]/g, "").trim();
+      headings.push({ level, text, id: slugifyHeading(text) });
+    }
+  }
+  return headings;
+}
+
+function makeHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") {
+  return function HeadingComponent({
+    node,
+    children,
+  }: {
+    node?: unknown;
+    children?: React.ReactNode;
+  }) {
+    const id = slugifyHeading(hastToText(node));
+    return <Tag id={id}>{children}</Tag>;
+  };
+}
+
 function normalizeImageSource(src: unknown): string | null {
   if (typeof src !== "string" || !src) {
     return null;
@@ -80,6 +131,12 @@ function normalizeImageSource(src: unknown): string | null {
 }
 
 const markdownComponents: Components = {
+  h1: makeHeading("h1"),
+  h2: makeHeading("h2"),
+  h3: makeHeading("h3"),
+  h4: makeHeading("h4"),
+  h5: makeHeading("h5"),
+  h6: makeHeading("h6"),
   img: ({ src, alt }) => {
     const imageSource = normalizeImageSource(src);
     if (!imageSource) {
@@ -141,6 +198,7 @@ export default async function BlogPostDetailApolloLogger({
   const markdownContent = post.content?.markdown
     ? transformBlogMarkdown(post.content.markdown)
     : null;
+  const tocHeadings = markdownContent ? parseHeadings(markdownContent) : [];
 
   return (
     <div className="flex w-full flex-col items-start gap-6 text-foreground">
@@ -178,6 +236,7 @@ export default async function BlogPostDetailApolloLogger({
             />
           ) : null}
         </header>
+        <TableOfContents headings={tocHeadings} />
         <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">
           {markdownContent ? (
             <ReactMarkdown

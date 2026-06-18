@@ -57,6 +57,16 @@
   - Server component that renders a single post via `fetchBlogPostBySlug`.
   - Cover image and inline markdown images both render through `ZoomableImage`.
   - The `markdownComponents.img` override returns a `ZoomableImage` instead of a plain `<Image>`.
+  - Parses headings (h1–h6) from raw markdown via `parseHeadings()` — skips lines inside fenced code blocks to avoid false matches on `#` comments.
+  - Injects `id` attributes on rendered headings via `makeHeading()` + `hastToText()` (hast AST traversal) using the same `slugifyHeading()` function as the parser.
+  - Passes extracted headings to `<TableOfContents>`.
+
+- **`TableOfContents`** (`src/components/TableOfContents.tsx`):
+  - Client component. Receives `TocHeading[]` (level, text, id), renders nothing if empty.
+  - Builds a tree with `buildTree()` for proper parent→child grouping and indentation.
+  - **Inline box**: collapsible, `<fieldset>`-free div with "Index" label + chevron. Grid `0fr→1fr` animation with `cubic-bezier(0.16, 1, 0.3, 1)` at 400ms (spring curve). Defaults open.
+  - **Sticky bar**: `IntersectionObserver` on the inline box ref. Appears (slides down from top) only when the inline box has scrolled off the TOP of the viewport (`boundingClientRect.top < 0`). Fixed, centered, `width: min(48rem, calc(100vw - 3rem))` to match article width. `backdrop-blur-md`, starts collapsed. Clicking a link auto-closes it.
+  - Heading links use `scrollIntoView({ behavior: 'smooth' })` + `hover:text-sky-300`.
 
 ## Theme Components
 - **`ThemeToggle`** (`src/components/ThemeToggle.tsx`):
