@@ -9,6 +9,7 @@ import LikeButton from "@/components/LikeButton";
 import TableOfContents, { type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { fetchBlogPostBySlug } from "@/lib/blog";
+import { remarkCallout } from "@/lib/remark-callout";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -240,7 +241,7 @@ export default async function BlogPostDetailApolloLogger({
         <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">
           {markdownContent ? (
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
+              remarkPlugins={[remarkGfm, remarkCallout]}
               rehypePlugins={[rehypeRaw]}
               components={markdownComponents}
             >

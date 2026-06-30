@@ -1,4 +1,4 @@
-import BlogPostDetailApolloLogger from "@/components/BlogPostDetailApolloLogger";
+import BlogPostDetail from "@/components/BlogPostDetail";
 import { fetchBlogPosts } from "@/lib/blog";
 
 export const revalidate = 3600;
@@ -22,7 +22,7 @@ export default async function BlogPostPage({
 
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 pb-28 pt-20 text-foreground">
-      <BlogPostDetailApolloLogger slug={slug} />
+      <BlogPostDetail slug={slug} />
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import BackToHomeLink from "@/components/BackToHomeLink";
 
-import BlogPostsApolloLogger from "@/components/BlogPostsApolloLogger";
+import BlogPosts from "@/components/BlogPosts";
 
 export const revalidate = 3600;
 
@@ -19,7 +19,7 @@ export default async function BlogPage() {
           Notes, experiments, thoughts and opinions.
         </p>
       </header>
-      <BlogPostsApolloLogger />
+      <BlogPosts />
       <div className="flex items-center gap-4 pt-6 text-muted-foreground">
         <span className="h-px flex-1 bg-border/70" />
         <span className="text-xs uppercase tracking-[0.25em]">

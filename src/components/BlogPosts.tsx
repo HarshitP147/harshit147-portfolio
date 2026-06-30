@@ -33,7 +33,7 @@ function renderError(error: unknown) {
   return <p className="text-sm text-muted-foreground">Unable to load posts.</p>;
 }
 
-export default async function BlogPostsApolloLogger() {
+export default async function BlogPosts() {
   const pageSize = 12;
 
   let posts: Awaited<ReturnType<typeof loadPosts>> | null = null;
