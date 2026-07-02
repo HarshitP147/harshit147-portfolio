@@ -73,6 +73,8 @@ export const remarkCallout: Plugin<[], Root> = () => {
       const contentNodes: BlockContent[] = [];
 
       const inlineChildren: PhrasingContent[] = [];
+      // Text on the same line after [!type] (and after emoji) becomes content
+      if (titleRaw) inlineChildren.push({ type: 'text', value: titleRaw });
       if (afterFirstLine) inlineChildren.push({ type: 'text', value: afterFirstLine });
       inlineChildren.push(...trailingSiblings);
 

@@ -23,7 +23,7 @@ const IMAGE_WITH_ALIGN_PATTERN =
 const IMAGE_SPLIT_LINE_PATTERN =
   /!\[([^\]]*)\]\s*\n+\s*\((https?:\/\/[^\s)]+)(?:\s+align=(?:"[^"]*"|'[^']*'))?\)/gm;
 
-type BlogPostDetailApolloLoggerProps = {
+type BlogPostDetailProps = {
   slug: string;
 };
 
@@ -168,9 +168,9 @@ function GoBackLink() {
   );
 }
 
-export default async function BlogPostDetailApolloLogger({
+export default async function BlogPostDetail({
   slug,
-}: BlogPostDetailApolloLoggerProps) {
+}: BlogPostDetailProps) {
   let post = null;
 
   try {
