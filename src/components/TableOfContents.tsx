@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 export type TocHeading = {
   level: number;
   text: string;
+  html: string;
   id: string;
 };
 
@@ -41,10 +42,10 @@ function TocLink({ heading, onClick }: { heading: TocHeading; onClick?: () => vo
         onClick?.();
         document.getElementById(heading.id)?.scrollIntoView({ behavior: "smooth" });
       }}
+      aria-label={heading.text}
       className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
-    >
-      {heading.text}
-    </a>
+      dangerouslySetInnerHTML={{ __html: heading.html }}
+    />
   );
 }
 

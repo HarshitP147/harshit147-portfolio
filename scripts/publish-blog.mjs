@@ -1,15 +1,27 @@
 // Publish one blog from local staging -> Cloudflare R2 + D1.
 //
-// Workflow:
+// Workflow (write locally in Obsidian):
+//   1. Write tmp/<slug>/index.md, embedding images either as Obsidian
+//      wiki-embeds ![[file.png]] / ![[slug/file.png]], or as plain markdown
+//      ![alt](./file.png) / ![alt](file.png).
+//   2. Put the referenced image files + meta.json alongside it:
+//        index.md
+//        meta.json           ({ "title": "..." })
+//        cover.<ext>          (optional; else the first embedded image is cover)
+//        <whatever>.<ext>     any files referenced via ![[...]] or ![]()
+//   3. npm run publish:blog -- <slug>
+//
+// Legacy workflow (Hashnode export, still supported):
 //   1. Draft + publish on Hashnode (free editor).
-//   2. Put the export at  tmp/<slug>/
-//        index.md            (Hashnode markdown export)
-//        meta.json           ({ "title": "...", "publishedAt": "ISO" })
-//        cover.<ext>          (optional; else the single numbered image is cover)
-//        one.<ext>, two.<ext> ... numbered inline images, in order of appearance
+//   2. Put the export at tmp/<slug>/ with numbered inline images
+//      (one.<ext>, two.<ext>, ...) matching cdn.hashnode.com urls in the
+//      markdown, in order of appearance.
 //   3. npm run publish:blog -- <slug>
 //
 // Idempotent: upserts by slug. read_time_minutes is auto-computed.
+// publishedAt is optional in meta.json: if omitted, first publish stamps the
+// current time and later republishes keep that original date. Set
+// meta.publishedAt explicitly (ISO or Hashnode's human format) to override.
 // Canonical content lives in R2/D1; tmp/ is transient (gitignored).
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -94,6 +106,12 @@ const WORDS = [
 // Hashnode markdown image: ![alt](https://cdn.hashnode.com/... [align="x"])
 const IMG_URL = /(!\[[^\]]*\]\()(https:\/\/cdn\.hashnode\.com[^\s)]+)/g;
 
+// Obsidian wiki-embed image: ![[file.png]] or ![[slug/file.png]]
+const WIKI_IMG = /!\[\[([^\]]+\.(?:png|jpg|jpeg|webp|gif|svg))\]\]/gi;
+
+// Plain markdown pointing at a local file: ![alt](./file.png) or ![alt](file.png)
+const LOCAL_IMG = /!\[([^\]]*)\]\((?:\.\/)?([a-zA-Z0-9_-]+\.(?:png|jpg|jpeg|webp|gif|svg))\)/gi;
+
 async function putR2(key, body, name) {
   await s3.send(
     new PutObjectCommand({
@@ -142,26 +160,51 @@ async function main() {
     process.exit(1);
   }
   if (!existsSync(join(dir, "meta.json"))) {
-    console.error(
-      `Missing ${dir}/meta.json  -> { "title": "...", "publishedAt": "ISO" }`,
-    );
+    console.error(`Missing ${dir}/meta.json  -> { "title": "..." }`);
     process.exit(1);
   }
 
   const meta = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8"));
-  if (!meta.title || !meta.publishedAt) {
-    console.error("meta.json needs at least: title, publishedAt");
+  if (!meta.title) {
+    console.error("meta.json needs at least: title");
     process.exit(1);
   }
 
   const files = readdirSync(dir);
   let markdown = readFileSync(join(dir, "index.md"), "utf8");
 
-  // numbered inline images present, in word order
-  const inlineImages = WORDS.map((w) => files.find((f) => f === `${w}${extname(f)}` || f.startsWith(`${w}.`)))
-    .filter(Boolean);
+  // Locally-authored posts: Obsidian wiki-embeds ![[file.png]], resolved by
+  // filename rather than position. Verify each referenced file exists before
+  // uploading anything.
+  const wikiFilenames = [...new Set(
+    [...markdown.matchAll(WIKI_IMG)].map((m) => m[1].split("/").pop()),
+  )];
+  for (const filename of wikiFilenames) {
+    if (!existsSync(join(dir, filename))) {
+      console.error(`![[${filename}]] in index.md has no matching file at ${dir}/${filename}`);
+      process.exit(1);
+    }
+  }
 
+  // Locally-authored posts: plain markdown pointing at a local file,
+  // ![alt](./file.png) or ![alt](file.png) — resolved by filename, same as
+  // wiki-embeds above.
+  const localFilenames = [...new Set(
+    [...markdown.matchAll(LOCAL_IMG)].map((m) => m[2]),
+  )];
+  for (const filename of localFilenames) {
+    if (!existsSync(join(dir, filename))) {
+      console.error(`![...](${filename}) in index.md has no matching file at ${dir}/${filename}`);
+      process.exit(1);
+    }
+  }
+
+  // Legacy Hashnode export: numbered files (one.png, two.png, ...) rewritten
+  // positionally against cdn.hashnode.com urls in order of appearance.
   const cdnUrls = [...markdown.matchAll(IMG_URL)];
+  const inlineImages = cdnUrls.length
+    ? WORDS.map((w) => files.find((f) => f === `${w}${extname(f)}` || f.startsWith(`${w}.`))).filter(Boolean)
+    : [];
   if (cdnUrls.length !== inlineImages.length) {
     console.error(
       `Image mismatch: ${cdnUrls.length} CDN urls in markdown but ${inlineImages.length} numbered files in ${dir}`,
@@ -183,8 +226,29 @@ async function main() {
   );
 
   // stable id: reuse existing row's id, else new uuid
-  const existing = await d1("SELECT id FROM posts WHERE slug = ?", [slug]);
+  const existing = await d1(
+    "SELECT id, published_at FROM posts WHERE slug = ?",
+    [slug],
+  );
   const id = existing[0]?.id ?? randomUUID();
+
+  // upload wiki-embed images, rewrite ![[file.png]] -> standard markdown + R2 url
+  for (const filename of wikiFilenames) {
+    await putR2(`${slug}/images/${filename}`, readFileSync(join(dir, filename)), filename);
+  }
+  markdown = markdown.replace(WIKI_IMG, (_m, wikiPath) => {
+    const filename = wikiPath.split("/").pop();
+    const alt = filename.replace(extname(filename), "");
+    return `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename})`;
+  });
+
+  // upload local-file images, rewrite ![alt](./file.png) -> ![alt](R2 url)
+  for (const filename of localFilenames) {
+    await putR2(`${slug}/images/${filename}`, readFileSync(join(dir, filename)), filename);
+  }
+  markdown = markdown.replace(LOCAL_IMG, (_m, alt, filename) =>
+    `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename})`,
+  );
 
   // upload inline images, rewrite nth CDN url -> nth R2 url
   for (const local of inlineImages) {
@@ -200,9 +264,12 @@ async function main() {
     "$1)",
   );
 
-  // cover: explicit cover.* else the single numbered image
+  // cover: explicit cover.* else the first embedded image (wiki, then local, then numbered)
   const cover =
-    files.find((f) => f.startsWith("cover.")) ?? inlineImages[0];
+    files.find((f) => f.startsWith("cover.")) ??
+    wikiFilenames[0] ??
+    localFilenames[0] ??
+    inlineImages[0];
   if (!cover) {
     console.error("No cover image found (need cover.* or a numbered image)");
     process.exit(1);
@@ -214,7 +281,11 @@ async function main() {
   await putR2(contentKey, markdown, "index.md");
 
   const readTime = meta.readTimeInMinutes || computeReadTime(markdown);
-  const publishedAt = toIsoDate(meta.publishedAt);
+  // First publish with no meta.publishedAt: stamp now. Later republishes
+  // without meta.publishedAt: keep the original date instead of bumping it.
+  const publishedAt = meta.publishedAt
+    ? toIsoDate(meta.publishedAt)
+    : (existing[0]?.published_at ?? new Date().toISOString());
   const dateModified = meta.dateModified
     ? toIsoDate(meta.dateModified)
     : publishedAt;

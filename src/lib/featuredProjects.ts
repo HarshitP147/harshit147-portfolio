@@ -14,15 +14,15 @@ export type FeaturedProject = {
 
 export const featuredProjects: FeaturedProject[] = [
   {
-    title: "Superscaler AI",
-    domain: "AI Platform",
+    title: "Numpy Network",
+    domain: "Deep Learning / AI",
     description:
-      "An AI platform that upscales images and videos to higher resolutions with AI.",
-    stack: ["Next.js", "Supabase", "Daisy UI", "Stripe"],
+      "A simple neural network built from scratch using only Numpy, designed to classify handwritten digits from the MNIST dataset.",
+    stack: ["Python", "Numpy", "Matplotlib", "Differential Calculus"],
     links: [
       {
         "label":"GitHub",
-        "href":"https://github.com/HarshitP147/superscaler-ai"
+        "href":"https://github.com/HarshitP147/nn-from-scratch"
       }
     ],
     isCurrent: true,

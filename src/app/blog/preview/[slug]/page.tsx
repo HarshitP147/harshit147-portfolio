@@ -3,6 +3,7 @@ import "katex/dist/katex.min.css";
 import fs from "fs";
 import path from "path";
 
+import katex from "katex";
 import { Clock3 } from "lucide-react";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -136,12 +137,45 @@ function slugifyHeading(text: string): string {
     .trim();
 }
 
-function hastToText(node: unknown): string {
-  if (!node || typeof node !== "object") return "";
-  const n = node as { type?: string; value?: string; children?: unknown[] };
-  if (n.type === "text" && typeof n.value === "string") return n.value;
-  if (Array.isArray(n.children)) return n.children.map(hastToText).join("");
-  return "";
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Splits a heading line on inline $math$ spans, rendering math through KaTeX
+// and stripping markdown decoration (*_`~[]) from the surrounding plain text.
+// Keeps the raw math expression (underscores intact) in `plain` so slugs stay
+// unique and stable; renders proper glyphs (e.g. subscripts) into `html`.
+const INLINE_MATH_RE = /\$([^$\n]+)\$/g;
+
+function parseHeadingText(raw: string): { plain: string; html: string } {
+  let plain = "";
+  let html = "";
+  let lastIndex = 0;
+
+  for (const m of raw.matchAll(INLINE_MATH_RE)) {
+    const before = raw.slice(lastIndex, m.index).replace(/[*_`~[\]]/g, "");
+    plain += before;
+    html += escapeHtml(before);
+
+    const expr = m[1];
+    plain += expr;
+    try {
+      html += katex.renderToString(expr, { throwOnError: false });
+    } catch {
+      html += escapeHtml(`$${expr}$`);
+    }
+
+    lastIndex = (m.index ?? 0) + m[0].length;
+  }
+
+  const rest = raw.slice(lastIndex).replace(/[*_`~[\]]/g, "");
+  plain += rest;
+  html += escapeHtml(rest);
+
+  return { plain: plain.trim(), html: html.trim() };
 }
 
 function parseHeadings(markdown: string): TocHeading[] {
@@ -153,22 +187,26 @@ function parseHeadings(markdown: string): TocHeading[] {
     const m = line.match(/^(#{1,6})\s+(.+)$/);
     if (m) {
       const level = m[1].length;
-      const text = m[2].replace(/[*_`~[\]]/g, "").trim();
-      headings.push({ level, text, id: slugifyHeading(text) });
+      const { plain, html } = parseHeadingText(m[2]);
+      headings.push({ level, text: plain, html, id: slugifyHeading(plain) });
     }
   }
   return headings;
 }
 
-function makeHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") {
-  return function HeadingComponent({
-    node,
-    children,
-  }: {
-    node?: unknown;
-    children?: React.ReactNode;
-  }) {
-    return <Tag id={slugifyHeading(hastToText(node))}>{children}</Tag>;
+// Assigns heading DOM ids by document-order index into `headings` rather than
+// re-deriving the slug from the rendered (post-KaTeX) hast tree — the KaTeX
+// output text doesn't reliably round-trip through the same slugify logic, so
+// index-based lookup is what keeps these ids in sync with the TOC's ids.
+function makeHeading(
+  Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6",
+  headings: TocHeading[],
+  counter: { current: number },
+) {
+  return function HeadingComponent({ children }: { children?: React.ReactNode }) {
+    const id = headings[counter.current]?.id;
+    counter.current += 1;
+    return <Tag id={id}>{children}</Tag>;
   };
 }
 
@@ -184,28 +222,36 @@ function normalizeImageSrc(src: unknown): string | null {
   }
 }
 
-const markdownComponents: Components = {
-  h1: makeHeading("h1"),
-  h2: makeHeading("h2"),
-  h3: makeHeading("h3"),
-  h4: makeHeading("h4"),
-  h5: makeHeading("h5"),
-  h6: makeHeading("h6"),
-  img: ({ src, alt }) => {
-    const imageSource = normalizeImageSrc(src);
-    if (!imageSource) return null;
-    return (
-      <ZoomableImage
-        src={imageSource}
-        alt={alt ?? ""}
-        width={1600}
-        height={900}
-        sizes="(max-width: 768px) 100vw, 768px"
-        className="my-6 border border-border/70"
-      />
-    );
-  },
-};
+function createMarkdownComponents(headings: TocHeading[]): Components {
+  const counter = { current: 0 };
+  return {
+    h1: makeHeading("h1", headings, counter),
+    h2: makeHeading("h2", headings, counter),
+    h3: makeHeading("h3", headings, counter),
+    h4: makeHeading("h4", headings, counter),
+    h5: makeHeading("h5", headings, counter),
+    h6: makeHeading("h6", headings, counter),
+    table: ({ children }) => (
+      <div className="blog-table-wrap">
+        <table>{children}</table>
+      </div>
+    ),
+    img: ({ src, alt }) => {
+      const imageSource = normalizeImageSrc(src);
+      if (!imageSource) return null;
+      return (
+        <ZoomableImage
+          src={imageSource}
+          alt={alt ?? ""}
+          width={1600}
+          height={900}
+          sizes="(max-width: 768px) 100vw, 768px"
+          className="my-6 border border-border/70"
+        />
+      );
+    },
+  };
+}
 
 // ── Data loading ──────────────────────────────────────────────────────────────
 type LocalMeta = {
@@ -214,11 +260,14 @@ type LocalMeta = {
   readTimeInMinutes?: number;
 };
 
+const IMAGE_EXT_RE = /\.(png|jpg|jpeg|webp|gif|svg)$/i;
+
 function loadLocalPost(slug: string): {
   title: string;
   publishedAt: string | null;
   readTimeInMinutes: number | null;
   markdown: string;
+  coverImage: string | null;
 } | null {
   const base = path.join(process.cwd(), "tmp", slug);
   const mdPath = path.join(base, "index.md");
@@ -237,11 +286,15 @@ function loadLocalPost(slug: string): {
     }
   }
 
+  const files = fs.existsSync(base) ? fs.readdirSync(base) : [];
+  const coverImage = files.find((f) => f.startsWith("cover.") && IMAGE_EXT_RE.test(f)) ?? null;
+
   return {
     title: meta.title ?? slug,
     publishedAt: meta.publishedAt ?? null,
     readTimeInMinutes: meta.readTimeInMinutes ?? null,
     markdown,
+    coverImage,
   };
 }
 
@@ -276,6 +329,7 @@ export default async function BlogPreviewPage({
 
   const markdown = transformMarkdown(post.markdown, slug);
   const tocHeadings = parseHeadings(markdown);
+  const markdownComponents = createMarkdownComponents(tocHeadings);
 
   const formattedDate = post.publishedAt
     ? (() => {
@@ -317,6 +371,18 @@ export default async function BlogPreviewPage({
                 )}
               </div>
             </div>
+            {post.coverImage ? (
+              <ZoomableImage
+                src={`/api/blog/preview/${slug}/${post.coverImage}`}
+                alt={post.title}
+                width={1600}
+                height={900}
+                sizes="(max-width: 1024px) 100vw, 960px"
+                className="rounded-3xl border border-foreground/10 bg-foreground/5"
+                imageClassName="object-cover"
+                priority
+              />
+            ) : null}
           </header>
           <TableOfContents headings={tocHeadings} />
           <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">
