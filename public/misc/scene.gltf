@@ -1,0 +1,234 @@
+{
+  "asset": {
+    "generator": "glTF-Transform v4.4.1",
+    "version": "2.0"
+  },
+  "accessors": [
+    {
+      "type": "SCALAR",
+      "componentType": 5125,
+      "count": 601014
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 110565,
+      "max": [
+        0.3416860103607178,
+        0.5,
+        0.3351238965988159
+      ],
+      "min": [
+        -0.341705322265625,
+        -0.5,
+        -0.33514404296875
+      ]
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5126,
+      "count": 110565
+    },
+    {
+      "type": "SCALAR",
+      "componentType": 5125,
+      "count": 459114
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 85506,
+      "max": [
+        0.2960871458053589,
+        0.4636796712875366,
+        0.5
+      ],
+      "min": [
+        -0.296112060546875,
+        -0.46368408203125,
+        -0.5
+      ]
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5126,
+      "count": 85506
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 491484
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 491484,
+      "byteLength": 388793
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "extensions": {
+        "EXT_texture_webp": {
+          "source": 0
+        }
+      }
+    },
+    {
+      "sampler": 0,
+      "extensions": {
+        "EXT_texture_webp": {
+          "source": 1
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/webp",
+      "uri": "baseColor_1.webp"
+    },
+    {
+      "mimeType": "image/webp",
+      "uri": "baseColor_2.webp"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "scene.bin",
+      "byteLength": 880277
+    }
+  ],
+  "materials": [
+    {
+      "name": "tripo_mat_7e990d9b-f730-42a3-aacc-d8af5551fe7d",
+      "pbrMetallicRoughness": {
+        "roughnessFactor": 0.9036020040512085,
+        "baseColorTexture": {
+          "index": 0
+        }
+      }
+    },
+    {
+      "name": "tripo_mat_ee969e9a-5110-478d-a846-92c8c36e7fcd",
+      "pbrMetallicRoughness": {
+        "roughnessFactor": 0.9036020040512085,
+        "baseColorTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "TEXCOORD_0": 2
+          },
+          "mode": 4,
+          "material": 0,
+          "indices": 0,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 0,
+              "attributes": {
+                "POSITION": 0,
+                "TEXCOORD_0": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 4,
+            "TEXCOORD_0": 5
+          },
+          "mode": 4,
+          "material": 1,
+          "indices": 3,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 1,
+              "attributes": {
+                "POSITION": 0,
+                "TEXCOORD_0": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "tripo_node_7e990d9b-f730-42a3-aacc-d8af5551fe7d",
+      "extras": {
+        "name": "tripo_node_7e990d9b-f730-42a3-aacc-d8af5551fe7d"
+      },
+      "translation": [
+        0,
+        0.07157267118900368,
+        0.4982315241620613
+      ],
+      "rotation": [
+        0.007390226730675856,
+        -0.4862598315441922,
+        0.015590646976129625,
+        0.8736439163082113
+      ],
+      "mesh": 0
+    },
+    {
+      "name": "tripo_node_ee969e9a-5110-478d-a846-92c8c36e7fcd",
+      "extras": {
+        "name": "tripo_node_ee969e9a-5110-478d-a846-92c8c36e7fcd"
+      },
+      "translation": [
+        0,
+        0.0751264251896509,
+        1.0460609009243502
+      ],
+      "rotation": [
+        0,
+        0.6987586216350721,
+        0,
+        0.7153575250814478
+      ],
+      "mesh": 1
+    }
+  ],
+  "scenes": [
+    {
+      "name": "table.glb",
+      "nodes": [
+        1,
+        0
+      ]
+    }
+  ],
+  "scene": 0,
+  "extensionsUsed": [
+    "EXT_texture_webp",
+    "KHR_draco_mesh_compression"
+  ],
+  "extensionsRequired": [
+    "EXT_texture_webp",
+    "KHR_draco_mesh_compression"
+  ]
+}

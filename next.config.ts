@@ -21,7 +21,7 @@ if (!r2Host && process.env.NODE_ENV === "production") {
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js inline runtime scripts + theme-init inline script.
-  // 'wasm-unsafe-eval' is required by the Draco WASM decoder for scene.glb.
+  // 'wasm-unsafe-eval' is required by the Draco WASM decoder for scene.gltf.
   "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   // next/image serves from same origin; blog content may reference https images.

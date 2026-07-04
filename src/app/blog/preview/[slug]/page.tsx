@@ -92,7 +92,7 @@ function normalizeMathDelimiters(markdown: string): string {
 //   \gt → >   \lt → <   (not KaTeX commands; JS/HTML comparison operators)
 function preprocessMathBlocks(markdown: string): string {
   return markdown.replace(/\$\$([\s\S]*?)\$\$/g, (_match, math: string) => {
-    let m = math
+    const m = math
       .replace(/\\begin\{(gather|align|equation|multline)\}/g, "\\begin{$1*}")
       .replace(/\\end\{(gather|align|equation|multline)\}/g, "\\end{$1*}")
       // \displaylines{\n...\n} where the closing } is alone on its line

@@ -26,7 +26,7 @@ function getDevicePixelRatio() {
 }
 
 function Model() {
-  const { scene } = useGLTF("/misc/scene.glb", true);
+  const { scene } = useGLTF("/misc/scene.gltf", true);
 
   useEffect(() => {
     scene.traverse((child) => {

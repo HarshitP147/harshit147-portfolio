@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Auto-generated GraphQL types
     "src/lib/graphql/generated.ts",
+    // Obsidian vault (third-party plugins, not project source)
+    "tmp/**",
   ]),
 ]);
 
