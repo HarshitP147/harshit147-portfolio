@@ -168,6 +168,9 @@
   }
   html {
     scroll-behavior: smooth;
+    /* Clip stray horizontal overflow (full-bleed 100vw hero, sticky rail) without
+       creating a scroll container, so position: sticky keeps working. */
+    overflow-x: clip;
   }
 }
 
@@ -337,6 +340,18 @@
 .icon-card:focus-visible::after {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.blog-markdown h1 {
+  margin-top: 1.2em;
+}
+
+.blog-markdown h2 {
+  margin-top: 0.8em;
+}
+
+.blog-markdown h3 {
+  margin-top: 0.6em;
 }
 
 .blog-markdown :where(pre) {
