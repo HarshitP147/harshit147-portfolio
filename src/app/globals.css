@@ -339,6 +339,18 @@
   transform: translate(-50%, 0);
 }
 
+.blog-markdown h1 {
+  margin-top: 1.2em;
+}
+
+.blog-markdown h2 {
+  margin-top: 0.8em;
+}
+
+.blog-markdown h3 {
+  margin-top: 0.6em;
+}
+
 .blog-markdown :where(pre) {
   overflow-x: auto;
   border-radius: 1rem;
