@@ -5,6 +5,7 @@ import path from "path";
 
 import katex from "katex";
 import { Clock3 } from "lucide-react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import React from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -13,7 +14,7 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
-import TableOfContents, { type TocHeading } from "@/components/TableOfContents";
+import TableOfContents, { TocRail, type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { remarkCallout } from "@/lib/remark-callout";
 
@@ -352,38 +353,63 @@ export default async function BlogPreviewPage({
         <span className="text-amber-400/60">not published</span>
       </div>
 
-      <div className="flex w-full flex-col items-start gap-6">
-        <article className="mx-auto flex w-full max-w-3xl flex-col gap-10">
-          <header className="space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-                {post.title}
-              </h1>
-              <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
-                {formattedDate ? <span>{formattedDate}</span> : <span />}
-                {post.readTimeInMinutes ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock3 className="size-3.5" />
-                    {post.readTimeInMinutes} min read
-                  </span>
-                ) : (
-                  <span />
-                )}
+      <div className="flex w-full flex-col items-start gap-10">
+        {post.coverImage ? (
+          // Full-bleed hero with the title overlaid; article content follows below.
+          <section className="relative left-1/2 min-h-[560px] w-screen -translate-x-1/2 md:h-[100svh]">
+            <Image
+              src={`/api/blog/preview/${slug}/${post.coverImage}`}
+              alt={post.title}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/5" />
+            <div className="absolute inset-x-0 bottom-0 z-10 pb-14">
+              <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6">
+                <h1 className="text-4xl font-semibold leading-tight md:text-6xl">
+                  {post.title}
+                </h1>
+                <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+                  {formattedDate ? <span>{formattedDate}</span> : <span />}
+                  {post.readTimeInMinutes ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock3 className="size-3.5" />
+                      {post.readTimeInMinutes} min read
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                </div>
               </div>
             </div>
-            {post.coverImage ? (
-              <ZoomableImage
-                src={`/api/blog/preview/${slug}/${post.coverImage}`}
-                alt={post.title}
-                width={1600}
-                height={900}
-                sizes="(max-width: 1024px) 100vw, 960px"
-                className="rounded-3xl border border-foreground/10 bg-foreground/5"
-                imageClassName="object-cover"
-                priority
-              />
-            ) : null}
+          </section>
+        ) : (
+          <header className="mx-auto w-full max-w-3xl space-y-4">
+            <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
+              {post.title}
+            </h1>
+            <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+              {formattedDate ? <span>{formattedDate}</span> : <span />}
+              {post.readTimeInMinutes ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 className="size-3.5" />
+                  {post.readTimeInMinutes} min read
+                </span>
+              ) : (
+                <span />
+              )}
+            </div>
           </header>
+        )}
+        <div className="relative mx-auto w-full max-w-3xl">
+          <div className="absolute left-full top-0 hidden h-full pl-6 xl:block">
+            <div className="sticky top-24">
+              <TocRail headings={tocHeadings} />
+            </div>
+          </div>
+          <article className="flex w-full flex-col gap-10">
           <TableOfContents headings={tocHeadings} />
           <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">
             <ReactMarkdown
@@ -409,7 +435,8 @@ export default async function BlogPreviewPage({
               {markdown}
             </ReactMarkdown>
           </div>
-        </article>
+          </article>
+        </div>
       </div>
     </section>
   );

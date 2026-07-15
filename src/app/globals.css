@@ -168,6 +168,9 @@
   }
   html {
     scroll-behavior: smooth;
+    /* Clip stray horizontal overflow (full-bleed 100vw hero, sticky rail) without
+       creating a scroll container, so position: sticky keeps working. */
+    overflow-x: clip;
   }
 }
 

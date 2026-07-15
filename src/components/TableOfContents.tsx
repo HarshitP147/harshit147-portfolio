@@ -72,6 +72,25 @@ type TableOfContentsProps = {
   headings: TocHeading[];
 };
 
+// Desktop-only static index box. Positioned + made sticky by the parent so it
+// stays fixed in the right gutter while the post scrolls. Always expanded.
+export function TocRail({ headings }: TableOfContentsProps) {
+  if (headings.length === 0) return null;
+
+  const tree = buildTree(headings);
+
+  return (
+    <div className="w-56" aria-label="Table of contents">
+      <div className="px-4 py-3">
+        <span className="text-sm font-semibold text-foreground/70">Index</span>
+      </div>
+      <div className="flex max-h-[70vh] flex-col gap-1 overflow-y-auto px-4 pb-4">
+        <TocNodes nodes={tree} />
+      </div>
+    </div>
+  );
+}
+
 export default function TableOfContents({ headings }: TableOfContentsProps) {
   const [open, setOpen] = useState(true);
   const [isSticky, setIsSticky] = useState(false);
@@ -101,8 +120,8 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
 
   return (
     <>
-      {/* Inline TOC */}
-      <div ref={tocRef} className="w-full rounded-2xl border border-border/60" aria-label="Table of contents">
+      {/* Inline TOC (mobile / tablet — desktop uses the right-hand rail) */}
+      <div ref={tocRef} className="w-full rounded-2xl border border-border/60 xl:hidden" aria-label="Table of contents">
         <button
           onClick={() => setOpen((o) => !o)}
           className="flex w-full items-center justify-between px-4 py-3 transition-colors hover:text-foreground"
@@ -130,7 +149,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
       {/* Sticky TOC */}
       <div
         aria-label="Table of contents (sticky)"
-        className="fixed left-1/2 top-4 z-50 rounded-2xl border border-border/40 bg-background/90 shadow-md backdrop-blur-md"
+        className="fixed left-1/2 top-4 z-50 rounded-2xl border border-border/40 bg-background/90 shadow-md backdrop-blur-md xl:hidden"
         style={{
           width: "min(48rem, calc(100vw - 3rem))",
           transform: isSticky ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(-130%)",

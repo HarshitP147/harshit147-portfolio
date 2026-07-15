@@ -2,6 +2,7 @@ import "katex/dist/katex.min.css";
 
 import katex from "katex";
 import { Clock3 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -11,7 +12,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
 import LikeButton from "@/components/LikeButton";
-import TableOfContents, { type TocHeading } from "@/components/TableOfContents";
+import TableOfContents, { TocRail, type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { fetchBlogPostBySlug } from "@/lib/blog";
 import { remarkCallout } from "@/lib/remark-callout";
@@ -243,11 +244,14 @@ function createMarkdownComponents(headings: TocHeading[]): Components {
   };
 }
 
-function GoBackLink() {
+function GoBackLink({ className }: { className?: string }) {
   return (
     <Link
       href="/blog"
-      className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
+      className={
+        className ??
+        "text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
+      }
     >
       Go back
     </Link>
@@ -288,42 +292,74 @@ export default async function BlogPostDetail({
   const tocHeadings = markdownContent ? parseHeadings(markdownContent) : [];
   const markdownComponents = createMarkdownComponents(tocHeadings);
 
+  const metaRow = (
+    <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+      {formattedDate ? <span>{formattedDate}</span> : <span />}
+      {post.readTimeInMinutes ? (
+        <span className="inline-flex items-center gap-1.5">
+          <Clock3 className="size-3.5" />
+          {post.readTimeInMinutes} min read
+        </span>
+      ) : (
+        <span />
+      )}
+    </div>
+  );
+  const hasHero = Boolean(post.coverImage?.url);
+
   return (
-    <div className="flex w-full flex-col items-start gap-6 text-foreground">
-      <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
-        <GoBackLink />
-      </div>
-      <article className="mx-auto flex w-full max-w-3xl flex-col gap-10">
-        <header className="space-y-6">
-          <div className="space-y-4">
+    <div className="flex w-full flex-col items-start gap-10 text-foreground">
+      {hasHero ? (
+        // Full-bleed hero: cover fills the viewport with the title overlaid,
+        // article content follows directly below. Breaks out of the parent
+        // section's max-width (w-screen + centering) and top padding (-mt-20).
+        <section className="group relative left-1/2 -mt-20 min-h-[560px] w-screen -translate-x-1/2 md:h-[100svh]">
+          <Image
+            src={post.coverImage!.url}
+            alt={post.title}
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
+          />
+          {/* Scrim: fades to page background at the bottom so overlaid text stays legible */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/5" />
+          <div className="absolute inset-x-0 top-6 z-10">
+            <div className="mx-auto max-w-5xl px-6">
+              <GoBackLink className="inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-white/15 backdrop-blur-md transition-all duration-300 ease-out hover:bg-black/65 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" />
+            </div>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 z-10 pb-14">
+            <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6">
+              <h1 className="text-4xl font-semibold leading-tight md:text-6xl">
+                {post.title}
+              </h1>
+              {metaRow}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
+          <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+            <GoBackLink />
+          </div>
+          <header className="mx-auto w-full max-w-3xl space-y-4">
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
               {post.title}
             </h1>
-            <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
-              {formattedDate ? <span>{formattedDate}</span> : <span />}
-              {post.readTimeInMinutes ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock3 className="size-3.5" />
-                  {post.readTimeInMinutes} min read
-                </span>
-              ) : (
-                <span />
-              )}
-            </div>
+            {metaRow}
+          </header>
+        </>
+      )}
+      <div className="relative mx-auto w-full max-w-3xl">
+        {/* Sticky right-hand index rail (desktop). Absolute so the centered
+            article stays put; the inner sticky keeps it fixed while scrolling. */}
+        <div className="absolute left-full top-0 hidden h-full pl-6 xl:block">
+          <div className="sticky top-24">
+            <TocRail headings={tocHeadings} />
           </div>
-          {post.coverImage?.url ? (
-            <ZoomableImage
-              src={post.coverImage.url}
-              alt={post.title}
-              width={1600}
-              height={900}
-              sizes="(max-width: 1024px) 100vw, 960px"
-              className="rounded-3xl border border-foreground/10 bg-foreground/5"
-              imageClassName="object-cover"
-              priority
-            />
-          ) : null}
-        </header>
+        </div>
+        <article className="flex w-full flex-col gap-10">
         <TableOfContents headings={tocHeadings} />
         <div className="blog-markdown prose prose-neutral max-w-none dark:prose-invert prose-a:font-medium prose-a:text-foreground prose-a:underline-offset-4">
           {markdownContent ? (
@@ -357,7 +393,8 @@ export default async function BlogPostDetail({
           <LikeButton postId={post.id ?? post.slug} slug={post.slug} />
           <span className="h-px flex-1 bg-border/70" />
         </div>
-      </article>
+        </article>
+      </div>
     </div>
   );
 }
