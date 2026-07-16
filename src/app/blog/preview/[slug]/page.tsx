@@ -2,6 +2,7 @@ import "katex/dist/katex.min.css";
 
 import fs from "fs";
 import path from "path";
+import type { Metadata } from "next";
 
 import katex from "katex";
 import { Clock3 } from "lucide-react";
@@ -307,6 +308,20 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   year: "numeric",
 });
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = loadLocalPost(slug);
+
+  return {
+    title: post?.title ?? "Blog Preview",
+    description: post?.title ?? "Local blog preview",
+  };
+}
 
 export default async function BlogPreviewPage({
   params,
