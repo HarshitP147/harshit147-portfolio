@@ -16,7 +16,7 @@ export default async function BlogPage() {
           <div />
         </div>
         <p className="text-center text-sm text-muted-foreground">
-          Notes, experiments, thoughts and opinions.
+          Notes, ideas and experiments : all human generated.
         </p>
       </header>
       <BlogPosts />

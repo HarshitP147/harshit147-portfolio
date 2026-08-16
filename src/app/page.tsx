@@ -23,13 +23,13 @@ export default async function Home() {
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I am a software engineer based in Dublin, Ireland. I have a passion for building applications that make an impact.
+              I am a software engineer in AI based in Dublin, Ireland. I got my Bachelors in Computer Engineering from Trinity College Dublin in 2025.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I completed my Bachelors in Computer Engineering from Trinity College Dublin in 2025. I have a keen interest in artificial intelligence,  web development and computer graphics.
+              I have a serious interest in artificial intelligence, web developments, GPU hardware and machine learning systems. I'm actively building skills to specialize in Machine learning systems and AI Inference.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I{`'`}m currently exploring how AI models can be used to integrate into existing applications, how they provide real value to non-technical users, understanding their limitations and exploring concepts that enables an individual to run them on their own hardware.
+              I{`'`}m currently exploring deep into the field of AI, by understanding the mathematics, the compute infrastructure, engineering trade-offs, business and economics and how they can be used to make an impact in the world. 
             </p>
           </div>
           <div className="flex w-full justify-center xl:w-auto xl:justify-end">
