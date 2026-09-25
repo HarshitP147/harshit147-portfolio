@@ -42,6 +42,7 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: r2Host
       ? [{ protocol: "https", hostname: r2Host }]
       : [],

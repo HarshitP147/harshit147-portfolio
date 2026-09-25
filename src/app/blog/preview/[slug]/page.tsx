@@ -10,6 +10,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import React from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
+import sharp from "sharp";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -17,15 +18,48 @@ import remarkMath from "remark-math";
 
 import TableOfContents, { TocRail, type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
+import { parseMediaSrc } from "@/lib/media-meta";
 import { remarkCallout } from "@/lib/remark-callout";
 
-// ── Local image rewrite patterns ─────────────────────────────────────────────
-// Standard markdown with relative path: ![alt](./one.png) or ![alt](one.png)
-const LOCAL_IMAGE_RE =
-  /!\[([^\]]*)\]\((?:\.\/)?([a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|gif|svg))\)/gi;
+// ── Local image/video rewrite patterns ───────────────────────────────────────
+const MEDIA_EXT = "png|jpg|jpeg|webp|gif|svg|mp4|webm|mov|m4v";
 
-// Obsidian wiki-link embeds: ![[one.png]] or ![[slug/one.png]]
-const WIKI_IMAGE_RE = /!\[\[([^\]]+\.(?:png|jpg|jpeg|webp|gif|svg))\]\]/gi;
+// Standard markdown with relative path: ![alt](./one.png) or ![alt](one.mp4)
+const LOCAL_IMAGE_RE = new RegExp(
+  `!\\[([^\\]]*)\\]\\((?:\\./)?([a-zA-Z0-9_-]+\\.(${MEDIA_EXT}))\\)`,
+  "gi",
+);
+
+// Obsidian wiki-link embeds: ![[one.png]] or ![[slug/one.mp4]]
+const WIKI_IMAGE_RE = new RegExp(`!\\[\\[([^\\]]+\\.(?:${MEDIA_EXT}))\\]\\]`, "gi");
+
+const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v)$/i;
+const POSTER_EXTS = ["jpg", "jpeg", "png", "webp"];
+
+// Poster convention: <video-basename>.poster.<ext> sitting next to the video
+// in tmp/<slug>/. Returns the preview API url, or null if no poster exists.
+function findPosterUrl(dirSlug: string, videoFilename: string): string | null {
+  const base = videoFilename.replace(VIDEO_EXT_RE, "");
+  const dir = path.join(process.cwd(), "tmp", dirSlug);
+  for (const ext of POSTER_EXTS) {
+    const posterFilename = `${base}.poster.${ext}`;
+    if (fs.existsSync(path.join(dir, posterFilename))) {
+      return `/api/blog/preview/${dirSlug}/${posterFilename}`;
+    }
+  }
+  return null;
+}
+
+// Videos are emitted as raw <video> HTML (passed through by rehypeRaw)
+// instead of markdown image syntax, since preload/poster have no markdown
+// equivalent and the poster lookup needs filesystem access, which only
+// works here, at transform time, not inside the ReactMarkdown tree.
+function videoMarkup(dirSlug: string, filename: string, alt: string): string {
+  const src = `/api/blog/preview/${dirSlug}/${filename}`;
+  const poster = findPosterUrl(dirSlug, filename);
+  const posterAttr = poster ? ` poster="${poster}"` : "";
+  return `<video src="${src}" controls preload="none"${posterAttr} playsinline class="my-6 w-full border border-border/70">${alt}</video>`;
+}
 
 function rewriteLocalImages(markdown: string, slug: string): string {
   return markdown
@@ -34,14 +68,59 @@ function rewriteLocalImages(markdown: string, slug: string): string {
       const parts = wikiPath.split("/");
       const filename = parts[parts.length - 1];
       const imageSlug = parts.length > 1 ? parts[0] : slug;
+      if (VIDEO_EXT_RE.test(filename)) {
+        return videoMarkup(imageSlug, filename, filename);
+      }
       return `![${filename}](/api/blog/preview/${imageSlug}/${filename})`;
     })
     // ![alt](./one.png) or ![alt](one.png)
-    .replace(
-      LOCAL_IMAGE_RE,
-      (_match, alt: string, filename: string) =>
-        `![${alt}](/api/blog/preview/${slug}/${filename})`,
-    );
+    .replace(LOCAL_IMAGE_RE, (_match, alt: string, filename: string) => {
+      if (VIDEO_EXT_RE.test(filename)) {
+        return videoMarkup(slug, filename, alt);
+      }
+      return `![${alt}](/api/blog/preview/${slug}/${filename})`;
+    });
+}
+
+// Mirrors what publish-blog.mjs bakes into image urls (#w=&h=&b=), so the
+// preview shows the same blur placeholder / no-layout-shift behaviour.
+const PREVIEW_IMAGE_RE =
+  /(!\[[^\]]*\]\()(\/api\/blog\/preview\/([^/]+)\/([^)\s]+\.(?:png|jpg|jpeg|webp|gif)))\)/gi;
+
+async function addPreviewMediaMeta(markdown: string): Promise<string> {
+  const matches = [...markdown.matchAll(PREVIEW_IMAGE_RE)];
+  const fragments = new Map<string, string>();
+
+  await Promise.all(
+    matches.map(async ([, , url, dirSlug, filename]) => {
+      if (fragments.has(url)) return;
+      const file = path.join(process.cwd(), "tmp", path.basename(dirSlug), path.basename(filename));
+      if (!fs.existsSync(file)) return;
+      try {
+        const buf = fs.readFileSync(file);
+        const meta = await sharp(buf).metadata();
+        if (!meta.width || !meta.height) return;
+        const swap = (meta.orientation ?? 1) >= 5;
+        const blur = await sharp(buf)
+          .rotate()
+          .resize(10)
+          .webp({ quality: 40 })
+          .toBuffer();
+        fragments.set(
+          url,
+          `#w=${swap ? meta.height : meta.width}&h=${swap ? meta.width : meta.height}&b=${encodeURIComponent(`data:image/webp;base64,${blur.toString("base64")}`)}`,
+        );
+      } catch {
+        // unreadable image: render without placeholder
+      }
+    }),
+  );
+
+  return markdown.replace(
+    PREVIEW_IMAGE_RE,
+    (m, prefix: string, url: string) =>
+      fragments.has(url) ? `${prefix}${url}${fragments.get(url)})` : m,
+  );
 }
 
 // ── Same transforms as BlogPostDetail ────────────────────────────────────────
@@ -241,12 +320,16 @@ function createMarkdownComponents(headings: TocHeading[]): Components {
     img: ({ src, alt }) => {
       const imageSource = normalizeImageSrc(src);
       if (!imageSource) return null;
+
+      const media = parseMediaSrc(imageSource);
+
       return (
         <ZoomableImage
-          src={imageSource}
+          src={media.src}
           alt={alt ?? ""}
-          width={1600}
-          height={900}
+          width={media.width ?? 1600}
+          height={media.height ?? 900}
+          blurDataURL={media.blurDataURL}
           sizes="(max-width: 768px) 100vw, 768px"
           className="my-6 border border-border/70"
         />
@@ -343,7 +426,9 @@ export default async function BlogPreviewPage({
     );
   }
 
-  const markdown = transformMarkdown(post.markdown, slug);
+  const markdown = await addPreviewMediaMeta(
+    transformMarkdown(post.markdown, slug),
+  );
   const tocHeadings = parseHeadings(markdown);
   const markdownComponents = createMarkdownComponents(tocHeadings);
 

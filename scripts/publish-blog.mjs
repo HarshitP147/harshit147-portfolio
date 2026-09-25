@@ -34,6 +34,7 @@ import "cloudflare/shims/web";
 
 import Cloudflare from "cloudflare";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import sharp from "sharp";
 
 for (const line of readFileSync(".env.local", "utf8").split("\n")) {
   const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
@@ -92,6 +93,10 @@ const CONTENT_TYPES = {
   ".webp": "image/webp",
   ".gif": "image/gif",
   ".md": "text/markdown; charset=utf-8",
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".mov": "video/quicktime",
+  ".m4v": "video/x-m4v",
 };
 const contentType = (name) =>
   CONTENT_TYPES[extname(name).toLowerCase()] ?? "application/octet-stream";
@@ -106,11 +111,16 @@ const WORDS = [
 // Hashnode markdown image: ![alt](https://cdn.hashnode.com/... [align="x"])
 const IMG_URL = /(!\[[^\]]*\]\()(https:\/\/cdn\.hashnode\.com[^\s)]+)/g;
 
-// Obsidian wiki-embed image: ![[file.png]] or ![[slug/file.png]]
-const WIKI_IMG = /!\[\[([^\]]+\.(?:png|jpg|jpeg|webp|gif|svg))\]\]/gi;
+const MEDIA_EXT = "png|jpg|jpeg|webp|gif|svg|mp4|webm|mov|m4v";
 
-// Plain markdown pointing at a local file: ![alt](./file.png) or ![alt](file.png)
-const LOCAL_IMG = /!\[([^\]]*)\]\((?:\.\/)?([a-zA-Z0-9_-]+\.(?:png|jpg|jpeg|webp|gif|svg))\)/gi;
+// Obsidian wiki-embed image/video: ![[file.png]], ![[slug/file.png]], ![[clip.mp4]]
+const WIKI_IMG = new RegExp(`!\\[\\[([^\\]]+\\.(?:${MEDIA_EXT}))\\]\\]`, "gi");
+
+// Plain markdown pointing at a local file: ![alt](./file.png) or ![alt](file.mp4)
+const LOCAL_IMG = new RegExp(
+  `!\\[([^\\]]*)\\]\\((?:\\./)?([a-zA-Z0-9_-]+\\.(?:${MEDIA_EXT}))\\)`,
+  "gi",
+);
 
 async function putR2(key, body, name) {
   await s3.send(
@@ -119,10 +129,36 @@ async function putR2(key, body, name) {
       Key: key,
       Body: body,
       ContentType: contentType(name ?? key),
+      // Media only: index.md must stay revalidatable so republishes show up.
+      ...(extname(name ?? key).toLowerCase() !== ".md" && {
+        CacheControl: "public, max-age=31536000, immutable",
+      }),
     }),
   );
   console.log(`  R2  ${key}`);
 }
+
+// Raster images get their real dimensions + a tiny blurred placeholder baked
+// into the url fragment (#w=&h=&b=) so the site can reserve the right box and
+// show a blur while the full image loads. Videos/svg are left alone.
+const RASTER = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
+const mediaFragments = new Map();
+
+async function computeMediaFragment(dir, filename) {
+  if (mediaFragments.has(filename)) return;
+  if (!RASTER.has(extname(filename).toLowerCase())) return;
+  const buf = readFileSync(join(dir, filename));
+  const meta = await sharp(buf).metadata();
+  if (!meta.width || !meta.height) return;
+  const swap = (meta.orientation ?? 1) >= 5; // EXIF-rotated: dims are flipped
+  const blur = await sharp(buf).rotate().resize(10).webp({ quality: 40 }).toBuffer();
+  const dataUrl = `data:image/webp;base64,${blur.toString("base64")}`;
+  mediaFragments.set(
+    filename,
+    `#w=${swap ? meta.height : meta.width}&h=${swap ? meta.width : meta.height}&b=${encodeURIComponent(dataUrl)}`,
+  );
+}
+const fragmentFor = (filename) => mediaFragments.get(filename) ?? "";
 
 async function d1(sql, params = []) {
   const page = await cf.d1.database.query(CLOUDFLARE_D1_DATABASE_ID, {
@@ -232,6 +268,10 @@ async function main() {
   );
   const id = existing[0]?.id ?? randomUUID();
 
+  for (const f of [...wikiFilenames, ...localFilenames, ...inlineImages]) {
+    await computeMediaFragment(dir, f);
+  }
+
   // upload wiki-embed images, rewrite ![[file.png]] -> standard markdown + R2 url
   for (const filename of wikiFilenames) {
     await putR2(`${slug}/images/${filename}`, readFileSync(join(dir, filename)), filename);
@@ -239,7 +279,7 @@ async function main() {
   markdown = markdown.replace(WIKI_IMG, (_m, wikiPath) => {
     const filename = wikiPath.split("/").pop();
     const alt = filename.replace(extname(filename), "");
-    return `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename})`;
+    return `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename}${fragmentFor(filename)})`;
   });
 
   // upload local-file images, rewrite ![alt](./file.png) -> ![alt](R2 url)
@@ -247,7 +287,7 @@ async function main() {
     await putR2(`${slug}/images/${filename}`, readFileSync(join(dir, filename)), filename);
   }
   markdown = markdown.replace(LOCAL_IMG, (_m, alt, filename) =>
-    `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename})`,
+    `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename}${fragmentFor(filename)})`,
   );
 
   // upload inline images, rewrite nth CDN url -> nth R2 url
@@ -257,7 +297,7 @@ async function main() {
   let n = 0;
   markdown = markdown.replace(IMG_URL, (_m, prefix) => {
     const local = inlineImages[n++];
-    return `${prefix}${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${local}`;
+    return `${prefix}${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${local}${fragmentFor(local)}`;
   });
   markdown = markdown.replace(
     /(\]\([^\s)]+)\s+align=(?:"[^"]*"|'[^']*')\)/g,

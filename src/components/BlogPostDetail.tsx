@@ -15,6 +15,7 @@ import LikeButton from "@/components/LikeButton";
 import TableOfContents, { TocRail, type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { fetchBlogPostBySlug } from "@/lib/blog";
+import { parseMediaSrc } from "@/lib/media-meta";
 import { remarkCallout } from "@/lib/remark-callout";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -210,6 +211,8 @@ function normalizeImageSource(src: unknown): string | null {
   }
 }
 
+const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v)$/i;
+
 function createMarkdownComponents(headings: TocHeading[]): Components {
   const counter = { current: 0 };
   return {
@@ -230,12 +233,29 @@ function createMarkdownComponents(headings: TocHeading[]): Components {
         return null;
       }
 
+      if (VIDEO_EXT_RE.test(imageSource)) {
+        return (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
+          <video
+            src={imageSource}
+            controls
+            playsInline
+            className="my-6 w-full border border-border/70"
+          >
+            {alt}
+          </video>
+        );
+      }
+
+      const media = parseMediaSrc(imageSource);
+
       return (
         <ZoomableImage
-          src={imageSource}
+          src={media.src}
           alt={alt ?? ""}
-          width={1600}
-          height={900}
+          width={media.width ?? 1600}
+          height={media.height ?? 900}
+          blurDataURL={media.blurDataURL}
           sizes="(max-width: 768px) 100vw, 768px"
           className="my-6 border border-border/70"
         />

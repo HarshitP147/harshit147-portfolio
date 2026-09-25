@@ -44,6 +44,7 @@ type ZoomableImageProps = {
   className?: string;
   imageClassName?: string;
   priority?: boolean;
+  blurDataURL?: string;
 };
 
 export default function ZoomableImage({
@@ -55,6 +56,7 @@ export default function ZoomableImage({
   className,
   imageClassName,
   priority,
+  blurDataURL,
 }: ZoomableImageProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [srcRect, setSrcRect] = useState<DOMRect | null>(null);
@@ -231,6 +233,8 @@ export default function ZoomableImage({
           fill
           sizes={sizes}
           priority={priority}
+          placeholder={blurDataURL ? "blur" : "empty"}
+          blurDataURL={blurDataURL}
           onLoad={handleLoad}
           className={cn("block", imageClassName ?? "object-contain")}
         />
