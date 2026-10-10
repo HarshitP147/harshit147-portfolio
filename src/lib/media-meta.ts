@@ -13,11 +13,17 @@ export function parseMediaSrc(rawSrc: string): ParsedMediaSrc {
   const hashIndex = rawSrc.indexOf("#");
   if (hashIndex === -1) return { src: rawSrc };
 
-  const src = rawSrc.slice(0, hashIndex);
+  const rawPath = rawSrc.slice(0, hashIndex);
   const params = new URLSearchParams(rawSrc.slice(hashIndex + 1));
   const width = Number(params.get("w"));
   const height = Number(params.get("h"));
   const blur = params.get("b");
+  // v=<mtime> (preview-only, see addPreviewMediaMeta) busts Next's image
+  // optimizer cache — fold it back in as a real query param on the src.
+  const version = params.get("v");
+  const src = version
+    ? `${rawPath}${rawPath.includes("?") ? "&" : "?"}v=${version}`
+    : rawPath;
 
   return {
     src,

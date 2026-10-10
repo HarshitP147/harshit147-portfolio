@@ -279,7 +279,7 @@ async function main() {
   markdown = markdown.replace(WIKI_IMG, (_m, wikiPath) => {
     const filename = wikiPath.split("/").pop();
     const alt = filename.replace(extname(filename), "");
-    return `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename}${fragmentFor(filename)})`;
+    return `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${encodeURIComponent(filename)}${fragmentFor(filename)})`;
   });
 
   // upload local-file images, rewrite ![alt](./file.png) -> ![alt](R2 url)
@@ -287,7 +287,7 @@ async function main() {
     await putR2(`${slug}/images/${filename}`, readFileSync(join(dir, filename)), filename);
   }
   markdown = markdown.replace(LOCAL_IMG, (_m, alt, filename) =>
-    `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${filename}${fragmentFor(filename)})`,
+    `![${alt}](${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${encodeURIComponent(filename)}${fragmentFor(filename)})`,
   );
 
   // upload inline images, rewrite nth CDN url -> nth R2 url

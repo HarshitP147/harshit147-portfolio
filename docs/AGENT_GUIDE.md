@@ -42,7 +42,7 @@
 - Preserve the two-phase auto-rotation speed transition.
 
 ### Blog Guidelines
-- Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` should mirror placement and styling for its "Go back" link (top-left, muted, underline offset).
+- Keep blog navigation affordances consistent: the `/blog` page uses a muted "Back to Home" link at the top-left within page padding; `/blog/[slug]` places its "Go back" link at the top of the header above the title, as a muted pill (`rounded-full border border-border/60`) whose text + border turn blue on hover/focus.
 - Blog list/detail are server-rendered via `fetchBlogPosts`/`fetchBlogPostBySlug` (Cloudflare D1 + R2); do not reintroduce client data fetching on these routes.
 - Render blog images through `ZoomableImage`, not raw `<Image>`. This applies to both the cover image and the markdown `img` override in `BlogPostDetailApolloLogger.tsx`. Don't bypass the FLIP wrapper for one-off cases without good reason.
 

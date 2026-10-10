@@ -39,7 +39,7 @@ export default async function HomeLatestBlogs() {
   }
 
   const linkClassName =
-    "text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline";
+    "text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-[rgb(59,130,246)] hover:underline";
 
   return (
     <div className="flex flex-col gap-6">

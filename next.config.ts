@@ -43,6 +43,14 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
+    // Next 16 blocks query strings on local image sources by default. The
+    // local preview route needs one (?v=<mtime>) to bust the image
+    // optimizer's own cache when a re-exported file keeps its filename.
+    localPatterns: [
+      { pathname: "/misc/**" },
+      { pathname: "/marquee/**" },
+      { pathname: "/api/blog/preview/**" },
+    ],
     remotePatterns: r2Host
       ? [{ protocol: "https", hostname: r2Host }]
       : [],

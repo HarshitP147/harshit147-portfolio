@@ -23,7 +23,7 @@ export default async function Home() {
               </h1>
             </div>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
-              I am a software engineer in AI based in Dublin, Ireland. I got my Bachelors in Computer Engineering from Trinity College Dublin in 2025.
+              I am a software engineer in AI. I got my Bachelors in Computer Engineering from Trinity College Dublin in <a href="https://lnkd.in/p/g3dU3fiy" className="underline transition-colors duration-200 hover:text-[rgb(59,130,246)] focus-visible:text-[rgb(59,130,246)] focus-visible:outline-none">October 2025</a>.
             </p>
             <p className="mx-auto max-w-3xl text-center text-base text-muted-foreground xl:mx-0 xl:text-left">
               I have a serious interest in artificial intelligence, web developments, GPU hardware and machine learning systems. I'm actively building skills to specialize in Machine learning systems and AI Inference.

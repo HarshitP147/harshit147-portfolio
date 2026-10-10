@@ -44,7 +44,7 @@ export default function HomeFeaturedProjects() {
                           href={link.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group/project-link flex flex-col items-center gap-1 text-sm text-muted-foreground transition-colors duration-200 hover:text-[rgb(147,197,253)] focus-visible:text-[rgb(147,197,253)] focus-visible:outline-none"
+                          className="group/project-link flex flex-col items-center gap-1 text-sm text-muted-foreground transition-colors duration-200 hover:text-[rgb(59,130,246)] focus-visible:text-[rgb(59,130,246)] focus-visible:outline-none"
                         >
                           {link.label.toLowerCase() === "github" ? (
                             <Github className="size-[18px] transition-colors duration-200" aria-hidden="true" />

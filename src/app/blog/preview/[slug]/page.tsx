@@ -44,7 +44,7 @@ function findPosterUrl(dirSlug: string, videoFilename: string): string | null {
   for (const ext of POSTER_EXTS) {
     const posterFilename = `${base}.poster.${ext}`;
     if (fs.existsSync(path.join(dir, posterFilename))) {
-      return `/api/blog/preview/${dirSlug}/${posterFilename}`;
+      return `/api/blog/preview/${dirSlug}/${encodeURIComponent(posterFilename)}`;
     }
   }
   return null;
@@ -55,7 +55,7 @@ function findPosterUrl(dirSlug: string, videoFilename: string): string | null {
 // equivalent and the poster lookup needs filesystem access, which only
 // works here, at transform time, not inside the ReactMarkdown tree.
 function videoMarkup(dirSlug: string, filename: string, alt: string): string {
-  const src = `/api/blog/preview/${dirSlug}/${filename}`;
+  const src = `/api/blog/preview/${dirSlug}/${encodeURIComponent(filename)}`;
   const poster = findPosterUrl(dirSlug, filename);
   const posterAttr = poster ? ` poster="${poster}"` : "";
   return `<video src="${src}" controls preload="none"${posterAttr} playsinline class="my-6 w-full border border-border/70">${alt}</video>`;
@@ -71,14 +71,14 @@ function rewriteLocalImages(markdown: string, slug: string): string {
       if (VIDEO_EXT_RE.test(filename)) {
         return videoMarkup(imageSlug, filename, filename);
       }
-      return `![${filename}](/api/blog/preview/${imageSlug}/${filename})`;
+      return `![${filename}](/api/blog/preview/${imageSlug}/${encodeURIComponent(filename)})`;
     })
     // ![alt](./one.png) or ![alt](one.png)
     .replace(LOCAL_IMAGE_RE, (_match, alt: string, filename: string) => {
       if (VIDEO_EXT_RE.test(filename)) {
         return videoMarkup(slug, filename, alt);
       }
-      return `![${alt}](/api/blog/preview/${slug}/${filename})`;
+      return `![${alt}](/api/blog/preview/${slug}/${encodeURIComponent(filename)})`;
     });
 }
 
@@ -94,7 +94,12 @@ async function addPreviewMediaMeta(markdown: string): Promise<string> {
   await Promise.all(
     matches.map(async ([, , url, dirSlug, filename]) => {
       if (fragments.has(url)) return;
-      const file = path.join(process.cwd(), "tmp", path.basename(dirSlug), path.basename(filename));
+      const file = path.join(
+        process.cwd(),
+        "tmp",
+        path.basename(decodeURIComponent(dirSlug)),
+        path.basename(decodeURIComponent(filename)),
+      );
       if (!fs.existsSync(file)) return;
       try {
         const buf = fs.readFileSync(file);
@@ -106,9 +111,13 @@ async function addPreviewMediaMeta(markdown: string): Promise<string> {
           .resize(10)
           .webp({ quality: 40 })
           .toBuffer();
+        // v=<mtime> busts Next's /_next/image optimizer cache, which keys
+        // purely on request url+width+quality — with a stable filename
+        // across re-exports it otherwise keeps serving stale bytes forever.
+        const mtime = Math.round(fs.statSync(file).mtimeMs);
         fragments.set(
           url,
-          `#w=${swap ? meta.height : meta.width}&h=${swap ? meta.width : meta.height}&b=${encodeURIComponent(`data:image/webp;base64,${blur.toString("base64")}`)}`,
+          `#w=${swap ? meta.height : meta.width}&h=${swap ? meta.width : meta.height}&v=${mtime}&b=${encodeURIComponent(`data:image/webp;base64,${blur.toString("base64")}`)}`,
         );
       } catch {
         // unreadable image: render without placeholder
@@ -455,36 +464,35 @@ export default async function BlogPreviewPage({
 
       <div className="flex w-full flex-col items-start gap-10">
         {post.coverImage ? (
-          // Full-bleed hero with the title overlaid; article content follows below.
-          <section className="relative left-1/2 min-h-[560px] w-screen -translate-x-1/2 md:h-[100svh]">
-            <Image
-              src={`/api/blog/preview/${slug}/${post.coverImage}`}
-              alt={post.title}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/5" />
-            <div className="absolute inset-x-0 bottom-0 z-10 pb-14">
-              <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6">
-                <h1 className="text-4xl font-semibold leading-tight md:text-6xl">
-                  {post.title}
-                </h1>
-                <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
-                  {formattedDate ? <span>{formattedDate}</span> : <span />}
-                  {post.readTimeInMinutes ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock3 className="size-3.5" />
-                      {post.readTimeInMinutes} min read
-                    </span>
-                  ) : (
-                    <span />
-                  )}
-                </div>
+          // Full-bleed cover with no overlay; title + meta sit below it.
+          <>
+            <section className="relative left-1/2 min-h-[420px] w-screen -translate-x-1/2 md:h-[80svh]">
+              <Image
+                src={`/api/blog/preview/${slug}/${post.coverImage}`}
+                alt={post.title}
+                fill
+                sizes="100vw"
+                priority
+                className="object-cover"
+              />
+            </section>
+            <header className="mx-auto w-full max-w-3xl space-y-4">
+              <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+                {post.title}
+              </h1>
+              <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
+                {formattedDate ? <span>{formattedDate}</span> : <span />}
+                {post.readTimeInMinutes ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock3 className="size-3.5" />
+                    {post.readTimeInMinutes} min read
+                  </span>
+                ) : (
+                  <span />
+                )}
               </div>
-            </div>
-          </section>
+            </header>
+          </>
         ) : (
           <header className="mx-auto w-full max-w-3xl space-y-4">
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl">

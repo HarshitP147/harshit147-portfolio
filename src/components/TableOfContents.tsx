@@ -43,7 +43,7 @@ function TocLink({ heading, onClick }: { heading: TocHeading; onClick?: () => vo
         document.getElementById(heading.id)?.scrollIntoView({ behavior: "smooth" });
       }}
       aria-label={heading.text}
-      className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-sky-300 hover:underline"
+      className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-[rgb(59,130,246)] hover:underline"
       dangerouslySetInnerHTML={{ __html: heading.html }}
     />
   );
@@ -80,7 +80,7 @@ export function TocRail({ headings }: TableOfContentsProps) {
   const tree = buildTree(headings);
 
   return (
-    <div className="w-56" aria-label="Table of contents">
+    <div className="w-[min(20rem,calc(50vw-27rem))] rounded-2xl border border-border/60" aria-label="Table of contents">
       <div className="px-4 py-3">
         <span className="text-sm font-semibold text-foreground/70">Index</span>
       </div>
