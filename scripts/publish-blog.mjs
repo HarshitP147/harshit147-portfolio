@@ -160,6 +160,24 @@ async function computeMediaFragment(dir, filename) {
 }
 const fragmentFor = (filename) => mediaFragments.get(filename) ?? "";
 
+// Videos: a sibling <video-basename>.poster.<ext> (same convention as the
+// local preview) is uploaded and its R2 url carried as #p=<encoded url>.
+const VIDEO = new Set([".mp4", ".webm", ".mov", ".m4v"]);
+const POSTER_EXTS = ["jpg", "jpeg", "png", "webp"];
+
+async function uploadVideoPoster(dir, filename) {
+  if (mediaFragments.has(filename)) return;
+  if (!VIDEO.has(extname(filename).toLowerCase())) return;
+  const base = filename.slice(0, -extname(filename).length);
+  const poster = POSTER_EXTS.map((ext) => `${base}.poster.${ext}`).find((f) =>
+    existsSync(join(dir, f)),
+  );
+  if (!poster) return;
+  await putR2(`${slug}/images/${poster}`, readFileSync(join(dir, poster)), poster);
+  const posterUrl = `${R2_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${slug}/images/${encodeURIComponent(poster)}`;
+  mediaFragments.set(filename, `#p=${encodeURIComponent(posterUrl)}`);
+}
+
 async function d1(sql, params = []) {
   const page = await cf.d1.database.query(CLOUDFLARE_D1_DATABASE_ID, {
     account_id: CLOUDFLARE_ACCOUNT_ID,
@@ -270,6 +288,7 @@ async function main() {
 
   for (const f of [...wikiFilenames, ...localFilenames, ...inlineImages]) {
     await computeMediaFragment(dir, f);
+    await uploadVideoPoster(dir, f);
   }
 
   // upload wiki-embed images, rewrite ![[file.png]] -> standard markdown + R2 url

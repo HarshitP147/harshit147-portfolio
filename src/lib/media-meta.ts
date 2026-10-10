@@ -1,5 +1,7 @@
 // Publish-time image metadata rides on the image url's fragment:
 //   https://.../a.png#w=1920&h=1122&b=<encoded data:image/webp;base64,...>
+// Videos may carry a poster image url instead:
+//   https://.../clip.mp4#p=<encoded https://.../clip.poster.jpg>
 // The fragment is never sent to the server, so the image url itself is intact.
 
 export type ParsedMediaSrc = {
@@ -7,6 +9,7 @@ export type ParsedMediaSrc = {
   width?: number;
   height?: number;
   blurDataURL?: string;
+  poster?: string;
 };
 
 export function parseMediaSrc(rawSrc: string): ParsedMediaSrc {
@@ -18,6 +21,7 @@ export function parseMediaSrc(rawSrc: string): ParsedMediaSrc {
   const width = Number(params.get("w"));
   const height = Number(params.get("h"));
   const blur = params.get("b");
+  const poster = params.get("p");
   // v=<mtime> (preview-only, see addPreviewMediaMeta) busts Next's image
   // optimizer cache — fold it back in as a real query param on the src.
   const version = params.get("v");
@@ -30,5 +34,6 @@ export function parseMediaSrc(rawSrc: string): ParsedMediaSrc {
     width: width > 0 ? width : undefined,
     height: height > 0 ? height : undefined,
     blurDataURL: blur?.startsWith("data:image/") ? blur : undefined,
+    poster: poster && /^https?:\/\//.test(poster) ? poster : undefined,
   };
 }

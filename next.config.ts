@@ -27,6 +27,8 @@ const contentSecurityPolicy = [
   // next/image serves from same origin; blog content may reference https images.
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
+  // Blog videos (<video src>) are served straight from the public R2 bucket.
+  `media-src 'self'${r2Host ? ` https://${r2Host}` : ""}`,
   // Vercel Analytics / Speed Insights post to same-origin /_vercel/* in prod.
   // www.gstatic.com hosts the Draco decoder files fetched by drei's useGLTF.
   "connect-src 'self' https://vitals.vercel-insights.com https://www.gstatic.com",

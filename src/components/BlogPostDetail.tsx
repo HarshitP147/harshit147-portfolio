@@ -233,21 +233,24 @@ function createMarkdownComponents(headings: TocHeading[]): Components {
         return null;
       }
 
-      if (VIDEO_EXT_RE.test(imageSource)) {
+      // Parse first: the url may end in a #w=&h=&b= / #p= metadata fragment,
+      // so the extension check must run on the bare src.
+      const media = parseMediaSrc(imageSource);
+
+      if (VIDEO_EXT_RE.test(media.src)) {
         return (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
           <video
-            src={imageSource}
+            src={media.src}
+            poster={media.poster}
             controls
             playsInline
+            preload={media.poster ? "none" : "metadata"}
             className="my-6 w-full border border-border/70"
           >
             {alt}
           </video>
         );
       }
-
-      const media = parseMediaSrc(imageSource);
 
       return (
         <ZoomableImage
