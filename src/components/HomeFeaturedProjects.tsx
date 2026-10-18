@@ -1,4 +1,4 @@
-import { Github } from "lucide-react";
+import GithubOutlineIcon from "@/components/icons/GithubOutlineIcon";
 import { sectionTitleClassName } from "@/components/sectionStyles";
 import { featuredProjects } from "@/lib/featuredProjects";
 
@@ -47,7 +47,7 @@ export default function HomeFeaturedProjects() {
                           className="group/project-link flex flex-col items-center gap-1 text-sm text-muted-foreground transition-colors duration-200 hover:text-[rgb(59,130,246)] focus-visible:text-[rgb(59,130,246)] focus-visible:outline-none"
                         >
                           {link.label.toLowerCase() === "github" ? (
-                            <Github className="size-[18px] transition-colors duration-200" aria-hidden="true" />
+                            <GithubOutlineIcon className="size-[18px] transition-colors duration-200" aria-hidden="true" />
                           ) : null}
                           <span className="underline-offset-4 group-hover/project-link:underline group-focus-visible/project-link:underline">
                             {link.label}

@@ -18,11 +18,20 @@ if (!r2Host && process.env.NODE_ENV === "production") {
   );
 }
 
+// Dev only: React dev builds use eval() to rebuild callstacks (never in
+// production), and @vercel/analytics + speed-insights load their *.debug.js
+// scripts from va.vercel-scripts.com outside production (prod uses same-origin
+// /_vercel/*).
+const devScriptSrc =
+  process.env.NODE_ENV !== "production"
+    ? " 'unsafe-eval' https://va.vercel-scripts.com"
+    : "";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js inline runtime scripts + theme-init inline script.
   // 'wasm-unsafe-eval' is required by the Draco WASM decoder for scene.gltf.
-  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${devScriptSrc}`,
   "style-src 'self' 'unsafe-inline'",
   // next/image serves from same origin; blog content may reference https images.
   "img-src 'self' data: blob: https:",

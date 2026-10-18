@@ -67,7 +67,7 @@
 - Blog list and post detail (`/blog`, `/blog/[slug]`) are server-rendered via `fetchBlogPosts`/`fetchBlogPostBySlug` (Cloudflare D1 + R2); set the `CLOUDFLARE_*` and `R2_PUBLIC_BASE_URL` env vars.
 - Homepage "Projects" uses `HomeFeaturedProjects` with local typed data from `src/lib/featuredProjects.ts`.
 - Projects stack presentation is inline metadata separated by dots (`•`) instead of pill badges.
-- Projects GitHub actions use `lucide-react` `Github` icon and shared blue hover/focus color with text.
+- Projects GitHub actions use inline `GithubOutlineIcon` (lucide-react v1 removed brand icons) and shared blue hover/focus color with text.
 - The portfolio project can be marked with `isCurrent` in data to show the `Current` badge.
 
 ### Blog Image Tap-to-Expand (May 2026)
