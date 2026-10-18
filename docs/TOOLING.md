@@ -14,6 +14,7 @@
 
 ## Animation
 - `framer-motion` has been removed from the project.
+- `motion` (`motion/react`) is installed for spring-driven effects only — currently the desktop TOC blob (`TocBlob`), code-split with `next/dynamic` so mobile never loads it.
 - Prefer CSS transitions and animations for micro-interactions.
 - Button pulse animations use CSS keyframes.
 - TechMarquee uses CSS-based marquee animations.

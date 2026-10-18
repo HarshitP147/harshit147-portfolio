@@ -58,7 +58,7 @@
 - Pitfall: avoid using `transform` scaling (e.g., `scale-*`) to size layout columns. Transforms do not affect layout and can collapse or misalign sibling columns; size via widths/heights or grid columns instead.
 - Pitfall: for hover-only borders, use `border-transparent` with explicit `transition-[border-color]` and `hover:border-*`. If theme alpha makes the border hard to see, add a subtle hover `box-shadow` outline.
 - Theme toggle must initialize from stored preference and cookie to avoid theme flipping on navigation.
-- `framer-motion` has been removed; keep animations CSS-only unless there is a strong need for a library.
+- `framer-motion` has been removed; keep animations CSS-only unless there is a strong need for a library. `motion/react` is used only by `TocBlob` (desktop, dynamically imported).
 - Scroll-to-top button is fixed bottom-center; pages with footer text may need extra bottom padding to avoid overlap.
 - Global smooth scrolling is set in `src/app/globals.css` with reduced-motion fallback.
 

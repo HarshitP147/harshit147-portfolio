@@ -46,4 +46,4 @@ This file is a lookup map. The detailed, authoritative documentation lives under
 - Tailwind CSS for styling
 - @react-three/fiber for 3D
 - Server-side blog data from Cloudflare D1 + R2 (no client data fetching on blog pages)
-- CSS-only animations (no framer-motion)
+- CSS animations by default; `motion/react` only where velocity-preserving springs are needed (TOC blob). Never `framer-motion`.

@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 export type TocHeading = {
   level: number;
@@ -33,7 +34,15 @@ function buildTree(headings: TocHeading[]): TocNode[] {
   return root;
 }
 
-function TocLink({ heading, onClick }: { heading: TocHeading; onClick?: () => void }) {
+function TocLink({
+  heading,
+  onClick,
+  active = false,
+}: {
+  heading: TocHeading;
+  onClick?: () => void;
+  active?: boolean;
+}) {
   return (
     <a
       href={`#${heading.id}`}
@@ -43,21 +52,31 @@ function TocLink({ heading, onClick }: { heading: TocHeading; onClick?: () => vo
         document.getElementById(heading.id)?.scrollIntoView({ behavior: "smooth" });
       }}
       aria-label={heading.text}
-      className="text-sm text-muted-foreground underline-offset-4 transition-colors duration-200 ease-out hover:text-[rgb(59,130,246)] hover:underline"
+      aria-current={active ? "location" : undefined}
+      data-toc-id={heading.id}
+      className={`text-sm underline-offset-4 transition-colors duration-200 ease-out hover:text-[rgb(59,130,246)] hover:underline ${active ? "text-foreground" : "text-muted-foreground"}`}
       dangerouslySetInnerHTML={{ __html: heading.html }}
     />
   );
 }
 
-function TocNodes({ nodes, onLinkClick }: { nodes: TocNode[]; onLinkClick?: () => void }) {
+function TocNodes({
+  nodes,
+  onLinkClick,
+  activeIds,
+}: {
+  nodes: TocNode[];
+  onLinkClick?: () => void;
+  activeIds?: ReadonlySet<string>;
+}) {
   return (
     <>
       {nodes.map((node) => (
         <div key={`${node.heading.id}-${node.heading.level}`} className="flex flex-col gap-1">
-          <TocLink heading={node.heading} onClick={onLinkClick} />
+          <TocLink heading={node.heading} onClick={onLinkClick} active={activeIds?.has(node.heading.id)} />
           {node.children.length > 0 && (
             <div className="ml-1 flex flex-col gap-1 pl-4 mb-1">
-              <TocNodes nodes={node.children} onLinkClick={onLinkClick} />
+              <TocNodes nodes={node.children} onLinkClick={onLinkClick} activeIds={activeIds} />
             </div>
           )}
         </div>
@@ -72,9 +91,36 @@ type TableOfContentsProps = {
   headings: TocHeading[];
 };
 
+// Liquid highlight is desktop-only; keeping it in its own chunk means mobile
+// never downloads Motion or attaches the scroll-spy listeners.
+const TocBlob = dynamic(() => import("@/components/TocBlob"), { ssr: false });
+
+const DESKTOP_QUERY = "(min-width: 80rem)";
+
+function subscribeDesktop(callback: () => void) {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {};
+  const mq = window.matchMedia(DESKTOP_QUERY);
+  mq.addEventListener("change", callback);
+  return () => mq.removeEventListener("change", callback);
+}
+
+function getDesktopSnapshot() {
+  return window.matchMedia(DESKTOP_QUERY).matches;
+}
+
+function getDesktopServerSnapshot() {
+  return false;
+}
+
 // Desktop-only static index box. Positioned + made sticky by the parent so it
 // stays fixed in the right gutter while the post scrolls. Always expanded.
 export function TocRail({ headings }: TableOfContentsProps) {
+  const isDesktop = useSyncExternalStore(subscribeDesktop, getDesktopSnapshot, getDesktopServerSnapshot);
+  const [activeIds, setActiveIds] = useState<ReadonlySet<string>>(() => new Set());
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const linksRef = useRef<HTMLDivElement>(null);
+  const handleActiveChange = useCallback((ids: string[]) => setActiveIds(new Set(ids)), []);
+
   if (headings.length === 0) return null;
 
   const tree = buildTree(headings);
@@ -84,8 +130,18 @@ export function TocRail({ headings }: TableOfContentsProps) {
       <div className="px-4 py-3">
         <span className="text-sm font-semibold text-foreground/70">Index</span>
       </div>
-      <div className="flex max-h-[70vh] flex-col gap-1 overflow-y-auto px-4 pb-4">
-        <TocNodes nodes={tree} />
+      <div ref={scrollerRef} className="max-h-[70vh] overflow-y-auto px-4 pb-4 pt-1">
+        <div ref={linksRef} className="relative isolate flex flex-col gap-1">
+          {isDesktop && (
+            <TocBlob
+              headings={headings}
+              containerRef={linksRef}
+              scrollerRef={scrollerRef}
+              onActiveChange={handleActiveChange}
+            />
+          )}
+          <TocNodes nodes={tree} activeIds={isDesktop ? activeIds : undefined} />
+        </div>
       </div>
     </div>
   );

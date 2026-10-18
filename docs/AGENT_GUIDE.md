@@ -28,7 +28,7 @@
 ### Code Quality
 - Maintain TypeScript strict compatibility.
 - Keep imports alias-first (`@/...`) instead of long relative paths.
-- Avoid `framer-motion`; prefer CSS transitions/animations.
+- Never import `framer-motion`; prefer CSS transitions/animations. `motion/react` is allowed for spring-driven effects (currently only `TocBlob`), loaded via `next/dynamic`.
 - Use `next/image` for all static images (not `<img>` tags).
 - Don't call `setState` synchronously in `useEffect` bodies (`react-hooks/set-state-in-effect`). For external stores/media queries use `useSyncExternalStore`; otherwise defer with `setTimeout` or `requestAnimationFrame`.
 - Don't access `ref.current` during render (`react-hooks/refs`); promote render-relevant values to `useState`.

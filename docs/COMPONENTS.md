@@ -67,6 +67,13 @@
   - **Inline box**: collapsible, `<fieldset>`-free div with "Index" label + chevron. Grid `0fr→1fr` animation with `cubic-bezier(0.16, 1, 0.3, 1)` at 400ms (spring curve). Defaults open.
   - **Sticky bar**: `IntersectionObserver` on the inline box ref. Appears (slides down from top) only when the inline box has scrolled off the TOP of the viewport (`boundingClientRect.top < 0`). Fixed, centered, `width: min(48rem, calc(100vw - 3rem))` to match article width. `backdrop-blur-md`, starts collapsed. Clicking a link auto-closes it.
   - Heading links use `scrollIntoView({ behavior: 'smooth' })` + `hover:text-[rgb(59,130,246)]` (site-wide link hover blue).
+  - **`TocRail`** (desktop `xl+`): bordered right-gutter box. When `matchMedia("(min-width: 80rem)")` matches (via `useSyncExternalStore`), mounts `TocBlob` with `next/dynamic` (`ssr: false`).
+
+- **`TocBlob`** (`src/components/TocBlob.tsx`):
+  - Liquid scroll-spy highlight behind the rail links. Covers every heading whose section (heading → next heading, last ends at `.blog-markdown` bottom) overlaps the viewport below 80px.
+  - One rounded pill per row, measured from the link text via `Range.getBoundingClientRect()` (hugs indent + width). Pill layer is clipped by `inset()` driven by two Motion values (`top`, `bottom`), then run through an inline SVG goo filter (blur + alpha threshold, flat fill — no highlight/rim) so steps melt into one slimy blob.
+  - Direction-aware springs: leading edge `visualDuration 0.35 / bounce 0.2`, trailing `0.55 / 0.12`. Appears by growing from its span's centre; collapses to centre when nothing is active. Reduced motion → `jump()`.
+  - Covered links get `text-foreground` + `aria-current="location"`. Auto-scrolls the rail's own scroll box to keep the blob in view.
 
 ## Theme Components
 - **`ThemeToggle`** (`src/components/ThemeToggle.tsx`):
