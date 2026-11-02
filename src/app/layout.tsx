@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist_Mono, Outfit } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import ScrollToTop from "@/components/ScrollToTop";
 import BottomBar from "@/components/BottomBar";
 import "./globals.css";
@@ -60,8 +58,6 @@ export default async function RootLayout({
         {children}
         <BottomBar initialTheme={initialTheme} />
         <ScrollToTop />
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

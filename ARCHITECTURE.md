@@ -35,7 +35,6 @@
 - `public/*.svg`: Logo/icon assets used by marquee and UI.
 
 ## External Services
-- Vercel Analytics + Speed Insights are mounted in the root layout.
 - Cloudflare D1 (post metadata + likes) accessed via the `cloudflare` TypeScript SDK.
 - Cloudflare R2 (blog `index.md` + images) served from a public bucket URL.
 

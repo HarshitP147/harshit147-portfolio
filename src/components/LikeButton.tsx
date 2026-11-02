@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -105,6 +106,17 @@ export default function LikeButton({
       const responsePayload = (await response.json()) as LikeResponse;
       setLikes(Number.isFinite(responsePayload.likes) ? responsePayload.likes : 0);
       setIsLiked(responsePayload.liked === true);
+      if (responsePayload.liked) {
+        posthog.capture("blog_post_liked", {
+          post_id: postId,
+          post_slug: slug,
+        });
+      } else {
+        posthog.capture("blog_post_unliked", {
+          post_id: postId,
+          post_slug: slug,
+        });
+      }
     } catch {
       setIsLiked(previousIsLiked);
       setLikes(previousLikes);

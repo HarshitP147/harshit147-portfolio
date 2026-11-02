@@ -19,18 +19,15 @@ if (!r2Host && process.env.NODE_ENV === "production") {
 }
 
 // Dev only: React dev builds use eval() to rebuild callstacks (never in
-// production), and @vercel/analytics + speed-insights load their *.debug.js
-// scripts from va.vercel-scripts.com outside production (prod uses same-origin
-// /_vercel/*).
+// production).
 const devScriptSrc =
-  process.env.NODE_ENV !== "production"
-    ? " 'unsafe-eval' https://va.vercel-scripts.com"
-    : "";
+  process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : "";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js inline runtime scripts + theme-init inline script.
   // 'wasm-unsafe-eval' is required by the Draco WASM decoder for scene.gltf.
+  // PostHog scripts load same-origin via the /ingest proxy.
   `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${devScriptSrc}`,
   "style-src 'self' 'unsafe-inline'",
   // next/image serves from same origin; blog content may reference https images.
@@ -38,9 +35,9 @@ const contentSecurityPolicy = [
   "font-src 'self'",
   // Blog videos (<video src>) are served straight from the public R2 bucket.
   `media-src 'self'${r2Host ? ` https://${r2Host}` : ""}`,
-  // Vercel Analytics / Speed Insights post to same-origin /_vercel/* in prod.
   // www.gstatic.com hosts the Draco decoder files fetched by drei's useGLTF.
-  "connect-src 'self' https://vitals.vercel-insights.com https://www.gstatic.com",
+  // PostHog events post same-origin to /ingest (src/proxy.ts).
+  "connect-src 'self' https://www.gstatic.com",
   // DRACOLoader runs its decoder inside a Worker created from a blob: URL.
   "worker-src 'self' blob:",
   // Blog embeds are restricted to CodeSandbox in getEmbedMarkup().
@@ -66,6 +63,10 @@ const nextConfig: NextConfig = {
       ? [{ protocol: "https", hostname: r2Host }]
       : [],
   },
+  // PostHog API paths end in a slash (/ingest/e/, /ingest/flags/); without
+  // this Next 308-redirects each one before src/proxy.ts forwards it, adding
+  // a round trip.
+  skipTrailingSlashRedirect: true,
   turbopack: {
     rules: {
       "*.svg": {

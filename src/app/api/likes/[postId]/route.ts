@@ -1,7 +1,12 @@
+import { SeverityNumber } from "@opentelemetry/api-logs";
 import Cloudflare from "cloudflare";
 import { cookies, headers } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
+import {
+  flushPostHogLogs,
+  posthogLikeLogger,
+} from "../../../../../instrumentation";
 import {
   type DeviceType,
   LIKE_VISITOR_COOKIE,
@@ -206,6 +211,11 @@ function createErrorResponse(
 ) {
   // Log the real error server-side; never leak internals to the client.
   console.error(`[likes] ${postId}:`, error);
+  posthogLikeLogger?.emit({
+    body: "blog_like_request_failed",
+    severityNumber: SeverityNumber.ERROR,
+    attributes: { operation: "like_state_mutation" },
+  });
   return applyVisitorCookie(
     NextResponse.json(
       {
@@ -282,6 +292,7 @@ async function readLikeState(
 
 export async function GET(_: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -299,6 +310,7 @@ export async function GET(_: NextRequest, { params }: RouteParams) {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -314,6 +326,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Don't persist likes from self-identified bots/crawlers; return the
     // current state instead of writing a row.
     if (entry.deviceType === "bot") {
+      posthogLikeLogger?.emit({
+        body: "blog_like_bot_request_ignored",
+        severityNumber: SeverityNumber.WARN,
+        attributes: { operation: "like_state_mutation" },
+      });
       return createJsonResponse(
         await readLikeState(postId, visitorContext.visitorId),
         visitorContext,
@@ -362,6 +379,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       ],
     );
 
+    posthogLikeLogger?.emit({
+      body: "blog_like_state_updated",
+      severityNumber: SeverityNumber.INFO,
+      attributes: { operation: "like_state_mutation" },
+    });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,
@@ -373,6 +395,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
+  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -384,6 +407,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       [postId, visitorContext.visitorId],
     );
 
+    posthogLikeLogger?.emit({
+      body: "blog_like_state_updated",
+      severityNumber: SeverityNumber.INFO,
+      attributes: { operation: "like_state_mutation" },
+    });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,
