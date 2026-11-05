@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BlogPostCard, BlogPostCardSkeleton } from "@/components/BlogPostCard";
 import { sectionTitleClassName } from "@/components/sectionStyles";
 import { fetchBlogPosts } from "@/lib/blog";
+import { logger } from "@/lib/logger";
 
 export function HomeLatestBlogsSkeleton() {
   return (
@@ -28,7 +29,9 @@ export default async function HomeLatestBlogs() {
     posts = result.posts.filter((post) => Boolean(post.id && post.slug));
     hasMore = result.hasNextPage;
   } catch (error) {
-    console.error("[blog] Failed to load latest posts:", error);
+    logger.error("Failed to load blog posts", error, {
+      component: "HomeLatestBlogs",
+    });
     return (
       <p className="text-sm text-muted-foreground">Unable to load posts.</p>
     );

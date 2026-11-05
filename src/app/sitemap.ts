@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { fetchBlogPosts } from "@/lib/blog";
+import { logger } from "@/lib/logger";
 
 const SITE_URL = "https://harshit147.dev";
 
@@ -29,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
     return [...staticEntries, ...postEntries];
   } catch (error) {
-    console.error("[sitemap] Failed to load blog posts:", error);
+    logger.error("Failed to load blog posts for sitemap", error);
     return staticEntries;
   }
 }

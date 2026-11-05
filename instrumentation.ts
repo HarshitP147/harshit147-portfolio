@@ -1,61 +1,27 @@
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-import { resourceFromAttributes } from "@opentelemetry/resources";
-import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
+import type { Instrumentation } from "next";
 
-const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+import { emitLog, errorAttributes, flushLogs } from "./src/lib/logger";
 
-if ((!posthogKey || !posthogHost) && process.env.NODE_ENV !== "production") {
-  if (!posthogKey) {
-    console.error(
-      new Error(
-        "NEXT_PUBLIC_POSTHOG_KEY variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once NEXT_PUBLIC_POSTHOG_KEY is configured",
-      ),
-    );
-  }
-
-  if (!posthogHost) {
-    console.error(
-      new Error(
-        "NEXT_PUBLIC_POSTHOG_HOST variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once NEXT_PUBLIC_POSTHOG_HOST is configured",
-      ),
-    );
-  }
-}
-
-const logsEndpoint = posthogHost
-  ? `${posthogHost.replace(/\/$/, "")}/i/v1/logs`
-  : undefined;
-
-export const posthogLogProvider =
-  posthogKey && logsEndpoint
-    ? new LoggerProvider({
-        resource: resourceFromAttributes({
-          "service.name": "harshit-portfolio",
-        }),
-        processors: [
-          new BatchLogRecordProcessor({
-            exporter: new OTLPLogExporter({
-              url: logsEndpoint,
-              headers: {
-                Authorization: `Bearer ${posthogKey}`,
-                "Content-Type": "application/json",
-              },
-            }),
-          }),
-        ],
-      })
-    : undefined;
-
-// This logger is intentionally used only by purpose-written PostHog log lines.
-export const posthogLikeLogger = posthogLogProvider?.getLogger(
-  "posthog-wizard.likes",
-);
-
-export async function flushPostHogLogs() {
-  await posthogLogProvider?.forceFlush();
-}
-
-// Keep this Next.js instrumentation entry point without registering the
-// provider globally: only posthogLikeLogger is allowed to export logs.
+// Required entry point; the PostHog log exporter lives in src/lib/logger.ts.
 export function register() {}
+
+// Uncaught errors from server rendering, route handlers, server actions and
+// the proxy. Next.js already prints these to the console, so this only
+// forwards them to PostHog Logs (emitLog skips the console).
+export const onRequestError: Instrumentation.onRequestError = async (
+  error,
+  request,
+  context,
+) => {
+  emitLog("error", "Unhandled server error", {
+    ...errorAttributes(error),
+    "http.method": request.method,
+    "url.path": request.path,
+    "next.route_path": context.routePath,
+    "next.route_type": context.routeType,
+    "next.router_kind": context.routerKind,
+    "next.render_source": context.renderSource,
+    "next.revalidate_reason": context.revalidateReason,
+  });
+  await flushLogs();
+};

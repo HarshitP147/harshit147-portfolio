@@ -15,6 +15,7 @@ import LikeButton from "@/components/LikeButton";
 import TableOfContents, { TocRail, type TocHeading } from "@/components/TableOfContents";
 import ZoomableImage from "@/components/ZoomableImage";
 import { fetchBlogPostBySlug } from "@/lib/blog";
+import { logger } from "@/lib/logger";
 import { parseMediaSrc } from "@/lib/media-meta";
 import { remarkCallout } from "@/lib/remark-callout";
 
@@ -286,7 +287,7 @@ export default async function BlogPostDetail({
   try {
     post = await fetchBlogPostBySlug({ slug });
   } catch (error) {
-    console.error(`[blog] Failed to load post "${slug}":`, error);
+    logger.error("Failed to load blog post", error, { slug });
     return (
       <p className="text-sm text-muted-foreground">Unable to load the post.</p>
     );

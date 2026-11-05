@@ -1,5 +1,6 @@
 import { BlogPostCard } from "@/components/BlogPostCard";
 import { fetchBlogPosts } from "@/lib/blog";
+import { logger } from "@/lib/logger";
 
 async function loadPosts(pageSize: number) {
   const { posts } = await fetchBlogPosts({ first: pageSize });
@@ -29,7 +30,7 @@ function renderPosts(posts: ReturnType<typeof loadPosts> extends Promise<infer T
 }
 
 function renderError(error: unknown) {
-  console.error("[blog] Failed to load posts:", error);
+  logger.error("Failed to load blog posts", error, { component: "BlogPosts" });
   return <p className="text-sm text-muted-foreground">Unable to load posts.</p>;
 }
 

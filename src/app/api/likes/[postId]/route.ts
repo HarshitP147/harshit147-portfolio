@@ -1,12 +1,7 @@
-import { SeverityNumber } from "@opentelemetry/api-logs";
 import Cloudflare from "cloudflare";
 import { cookies, headers } from "next/headers";
-import { after, NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import {
-  flushPostHogLogs,
-  posthogLikeLogger,
-} from "../../../../../instrumentation";
 import {
   type DeviceType,
   LIKE_VISITOR_COOKIE,
@@ -15,6 +10,7 @@ import {
   type LikeMutationRequest,
   type LikeResponse,
 } from "@/lib/likes";
+import { logger } from "@/lib/logger";
 
 type RouteParams = {
   params: Promise<{
@@ -210,12 +206,7 @@ function createErrorResponse(
   visitorContext: VisitorContext,
 ) {
   // Log the real error server-side; never leak internals to the client.
-  console.error(`[likes] ${postId}:`, error);
-  posthogLikeLogger?.emit({
-    body: "blog_like_request_failed",
-    severityNumber: SeverityNumber.ERROR,
-    attributes: { operation: "like_state_mutation" },
-  });
+  logger.error("Blog like request failed", error, { post_id: postId });
   return applyVisitorCookie(
     NextResponse.json(
       {
@@ -292,7 +283,6 @@ async function readLikeState(
 
 export async function GET(_: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
-  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -310,7 +300,6 @@ export async function GET(_: NextRequest, { params }: RouteParams) {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
-  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -326,10 +315,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Don't persist likes from self-identified bots/crawlers; return the
     // current state instead of writing a row.
     if (entry.deviceType === "bot") {
-      posthogLikeLogger?.emit({
-        body: "blog_like_bot_request_ignored",
-        severityNumber: SeverityNumber.WARN,
-        attributes: { operation: "like_state_mutation" },
+      logger.warn("Ignored blog like from bot", {
+        post_id: postId,
+        os: entry.os,
       });
       return createJsonResponse(
         await readLikeState(postId, visitorContext.visitorId),
@@ -379,11 +367,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       ],
     );
 
-    posthogLikeLogger?.emit({
-      body: "blog_like_state_updated",
-      severityNumber: SeverityNumber.INFO,
-      attributes: { operation: "like_state_mutation" },
-    });
+    logger.info("Blog post liked", { post_id: postId });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,
@@ -395,7 +379,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { postId } = await params;
-  after(flushPostHogLogs);
   if (!POST_ID_PATTERN.test(postId)) {
     return createBadRequestResponse(postId.slice(0, 64));
   }
@@ -407,11 +390,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       [postId, visitorContext.visitorId],
     );
 
-    posthogLikeLogger?.emit({
-      body: "blog_like_state_updated",
-      severityNumber: SeverityNumber.INFO,
-      attributes: { operation: "like_state_mutation" },
-    });
+    logger.info("Blog post unliked", { post_id: postId });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,
