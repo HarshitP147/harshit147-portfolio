@@ -10,7 +10,6 @@ import {
   type LikeMutationRequest,
   type LikeResponse,
 } from "@/lib/likes";
-import { logger } from "@/lib/logger";
 
 type RouteParams = {
   params: Promise<{
@@ -206,7 +205,7 @@ function createErrorResponse(
   visitorContext: VisitorContext,
 ) {
   // Log the real error server-side; never leak internals to the client.
-  logger.error("Blog like request failed", error, { post_id: postId });
+  console.error(`[likes] ${postId}:`, error);
   return applyVisitorCookie(
     NextResponse.json(
       {
@@ -315,10 +314,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Don't persist likes from self-identified bots/crawlers; return the
     // current state instead of writing a row.
     if (entry.deviceType === "bot") {
-      logger.warn("Ignored blog like from bot", {
-        post_id: postId,
-        os: entry.os,
-      });
       return createJsonResponse(
         await readLikeState(postId, visitorContext.visitorId),
         visitorContext,
@@ -367,7 +362,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       ],
     );
 
-    logger.info("Blog post liked", { post_id: postId });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,
@@ -390,7 +384,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       [postId, visitorContext.visitorId],
     );
 
-    logger.info("Blog post unliked", { post_id: postId });
     return createJsonResponse(
       await readLikeState(postId, visitorContext.visitorId),
       visitorContext,

@@ -14,6 +14,7 @@ The tech stack:
 - ShadCN/UI
 - TailwindCSS
 - Cloudflare Typescript SDK
+- Vercel tools (Analytics and Speed insights)
 
 To run locally:
 ```sh
